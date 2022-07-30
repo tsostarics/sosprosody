@@ -16,6 +16,7 @@
 #' to 4 if given too small a value
 #'
 #' @return Returns formatted string to pass to `print.PitchTier`
+#' @export
 format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
   # Establish minimum dimensions for printing pitchtier objects to avoid errors
   if (.vert_res < 3)
@@ -118,6 +119,7 @@ format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
 #' @param ... Unused
 #'
 #' @return invisibly returns `x`
+#' @export
 print.PitchTier <- function(x, ...) {
   cat(format(x, ...), "\n")
   invisible(x)
