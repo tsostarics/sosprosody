@@ -11,6 +11,7 @@
 #' @param ... Additional arguments passed to `hz_to_semitones`
 #'
 #' @return Dataframe representation of the given pitchtier object
+#' @export
 pitchtier_to_dataframe <- function(pitchtier,
                                    add_semitones = TRUE,
                                    add_erbs = TRUE,

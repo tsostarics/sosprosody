@@ -6,6 +6,7 @@
 #' @param ptdir Directory containing pitchtier files
 #'
 #' @return Dataframe of the pitchtier information from each file
+#' @export
 batch_process_pitchtiers <- function(ptdir) {
   pt_files <- paste0(ptdir, list.files(ptdir,pattern = ".PitchTier$",ignore.case = TRUE))
   dat <-

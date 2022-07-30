@@ -18,6 +18,7 @@
 #' interval's starting timestamp.
 #'
 #' @return Merged dataframe
+#' @export
 #' @importFrom rlang `!!` `:=`
 #' @importFrom dplyr sym
 nest_tiers <- function(tg_df_list,
