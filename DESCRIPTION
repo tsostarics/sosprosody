@@ -13,6 +13,9 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     glue,
+    purrr,
     rlang,
     rPraat,
-    stats
+    stats,
+    tidyr,
+    tidyselect
