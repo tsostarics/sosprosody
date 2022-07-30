@@ -6,6 +6,7 @@
 #' @param textgrid TextGrid object from `tg.read`
 #'
 #' @return List of dataframes for each tier
+#' @export
 textgrid_to_dataframes <- function(textgrid) {
   dfs <-
     lapply(textgrid,
