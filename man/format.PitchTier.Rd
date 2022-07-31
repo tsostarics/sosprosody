@@ -4,10 +4,12 @@
 \alias{format.PitchTier}
 \title{Format console pitchtier plot}
 \usage{
-\method{format}{PitchTier}(pitchtier, .horiz_res = 80L, .vert_res = 10L)
+\method{format}{PitchTier}(x, ..., .horiz_res = 80L, .vert_res = 10L)
 }
 \arguments{
-\item{pitchtier}{PitchTier object}
+\item{x}{PitchTier object}
+
+\item{...}{Not used}
 
 \item{.horiz_res}{Horizontal resolution, integer number of characters
 wide to print. Will be coerced to be 10 if given too small a value.}

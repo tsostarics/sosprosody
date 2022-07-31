@@ -1,7 +1,7 @@
 #' Load multiple textgrids into wrangled dataframe
 #'
-#' Wrapper around filepath |> textgrid_to_dataframes() |> nest_tiers() |>
-#' separate_fileinfo(), merged together via `purrr::map_dfr`
+#' Wrapper around filepath |> textgrid_to_dataframes() |> nest_tiers()
+#' merged together via `purrr::map_dfr`
 #'
 #' Note: The textgrids are assumed (for now) to only contain 2 interval tiers:
 #' `words` and `phones`, as given by the output of the Montreal forced aligner.
@@ -16,13 +16,12 @@ batch_process_textgrids <- function(tgdir) {
     purrr::map_dfr(
       tg_files,
       \(filepath)
-      separate_fileinfo(
         nest_tiers(
           textgrid_to_dataframes(
             rPraat::tg.read(filepath)
           )
         )
-      )
+
     )
 
   message(glue::glue("Processed {length(tg_files)} TextGrids"))

@@ -13,6 +13,6 @@ batch_process_pitchtiers(ptdir)
 Dataframe of the pitchtier information from each file
 }
 \description{
-Wrapper around filepath |> pitchtier_to_dataframe()  |> separate_fileinfo(),
+Wrapper around filepath |> pitchtier_to_dataframe()
 merged together via \code{purrr::map_dfr}
 }

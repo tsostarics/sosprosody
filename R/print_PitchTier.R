@@ -8,16 +8,17 @@
 #' This looks like a lot but the execution time on average is only about
 #' a millisecond.
 #'
-#' @param pitchtier PitchTier object
+#' @param x PitchTier object
 #' @param .horiz_res Horizontal resolution, integer number of characters
 #' wide to print. Will be coerced to be 10 if given too small a value.
 #' @param .vert_res Vertical resolution, integer number of characters high to
 #' print. Will be coerced to an even number if given an odd number & coerced
 #' to 4 if given too small a value
+#' @param ... Not used
 #'
 #' @return Returns formatted string to pass to `print.PitchTier`
 #' @export
-format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
+format.PitchTier <- function(x, ..., .horiz_res = 80L, .vert_res = 10L) {
   # Establish minimum dimensions for printing pitchtier objects to avoid errors
   if (.vert_res < 3)
     .vert_res <- 4
@@ -27,12 +28,12 @@ format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
     .horiz_res <- 10
 
   # Convert to semitones for more representative shape
-  pitch_vals <- pitchtier[['f']] - mean(pitchtier[['f']])
+  pitch_vals <- x[['f']] - mean(x[['f']])
 
   # Get y-axis labels in Hz, then readjust the horizontal resolution
   # to accomodate the labels
-  fmin <- as.character(round(min(pitchtier[['f']]), 0))
-  fmax <- as.character(round(max(pitchtier[['f']]), 0))
+  fmin <- as.character(round(min(x[['f']]), 0))
+  fmax <- as.character(round(max(x[['f']]), 0))
   yaxislen <- max(nchar(c(fmin, fmax)))
   .horiz_res <- .horiz_res - yaxislen
   # Pad the Hz values with leading spaces as needed
@@ -40,12 +41,12 @@ format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
   fmax <- paste0(rep(" ", times = yaxislen - nchar(fmax)), fmax)
 
   # Get the total duration of the pitchtier object
-  tmin <- round(pitchtier[['tmin']], 2)
-  tmax <- round(pitchtier[['tmax']], 2)
+  tmin <- round(x[['tmin']], 2)
+  tmax <- round(x[['tmax']], 2)
 
   # Establish the domain for the pitch pulses (!= total duration)
-  first_pulse <- pitchtier[['t']][1]
-  last_pulse <- pitchtier[['t']][length(pitchtier[['t']])]
+  first_pulse <- x[['t']][1]
+  last_pulse <- x[['t']][length(x[['t']])]
   first_frame <- round((first_pulse * .horiz_res) / tmax, 0)
   last_frame <- round((last_pulse * .horiz_res) / tmax, 0)
   n_pulses <- last_frame - first_frame
@@ -95,9 +96,9 @@ format.PitchTier <- function(pitchtier, .horiz_res = 80L, .vert_res = 10L) {
 
   # Print the plot, indices are descending so we need to reverse
   # note: using paste0 w collapse is faster than using cat's sep
-  header <- paste0(class(pitchtier)[['name']],
+  header <- paste0(class(x)[['name']],
                    ": ",
-                   length(pitchtier[['f']]),
+                   length(x[['f']]),
                    " total pitch pulses.\n",
                    collapse = "")
   pitchplot <-

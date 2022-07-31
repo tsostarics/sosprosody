@@ -13,8 +13,8 @@ batch_process_textgrids(tgdir)
 Dataframe of the word and phone information from each textgrid
 }
 \description{
-Wrapper around filepath |> textgrid_to_dataframes() |> nest_tiers() |>
-separate_fileinfo(), merged together via \code{purrr::map_dfr}
+Wrapper around filepath |> textgrid_to_dataframes() |> nest_tiers()
+merged together via \code{purrr::map_dfr}
 }
 \details{
 Note: The textgrids are assumed (for now) to only contain 2 interval tiers:
