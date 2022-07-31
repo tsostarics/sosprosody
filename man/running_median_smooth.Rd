@@ -4,15 +4,17 @@
 \alias{running_median_smooth}
 \title{Running median smooth pitch track}
 \usage{
-running_median_smooth(pitchtier_df, .k = 5, .hz = "hz")
+running_median_smooth(pitchtier_df, .k = 5, .from = "hz", .to = "runmed_hz")
 }
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}}
 
 \item{.k}{\code{k} to use for \code{runmed}}
 
-\item{.hz}{Quoted variable name to hold new Hz values. Defaults to \code{hz},
-which will override the previous values}
+\item{.from}{Quoted variable name to pull Hz values from. Defaults to \code{.hz}}
+
+\item{.to}{Quoted variable name to put smoothed Hz values. Defaults to
+\code{runmed_hz}. If this is the same as \code{.from}, the values will be overwritten.}
 }
 \value{
 \code{pitchtier_df} with modified \code{hz} column or new column specified by

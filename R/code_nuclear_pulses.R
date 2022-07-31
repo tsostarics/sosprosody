@@ -1,11 +1,11 @@
 #' Code pulses by nuclear status
 #'
 #' Given a pitchtier dataframe and a correponding nuclear region dataframe
-#' from `get_nuclear_tg`, code each pulse for each file on whether it lies
+#' from `get_nuclear_textgrid`, code each pulse for each file on whether it lies
 #' within the nuclear region or not
 #'
 #' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtier`
-#' @param nuclear_df Nucler region dataframe, output of `get_nuclear_tg`
+#' @param nuclear_df Nuclear region dataframe, output of `get_nuclear_tg`
 #'
 #' @return `pitchtier_df` but with a new logical column `is_nuclear`
 #' @export
@@ -15,7 +15,13 @@ code_nuclear_pulses <- function(pitchtier_df,
                                 nuclear_df) {
   stopifnot(is.data.frame(nuclear_df))
 
+  no_nuclear_available <- !unique(pitchtier_df$file) %in% unique(nuclear_df$file)
+
+  if (any(no_nuclear_available))
+    warning(glue::glue("Removing {sum(no_nuclear_available)} files not found in `nuclear_df`"))
+
   pitchtier_df |>
+    dplyr::filter(pitchtier_df$file %in% nuclear_df$file) |>
     dplyr::group_by(file) |>
     dplyr::mutate(is_nuclear =
                     dplyr::between(

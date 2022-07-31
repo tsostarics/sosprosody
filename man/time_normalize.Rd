@@ -4,18 +4,32 @@
 \alias{time_normalize}
 \title{Time normalize pitch track}
 \usage{
-time_normalize(pitchtier_df, .timepoint = "timepoint")
+time_normalize(
+  pitchtier_df,
+  .from = "timepoint",
+  .to = "timepoint_norm",
+  .fromzero = TRUE
+)
 }
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}}
 
-\item{.timepoint}{Quoted variable name to hold new timepoint values.
-Defaults to \code{timepoint}, which will override the previous values.}
+\item{.from}{Quoted variable name to pull timepoint values from. Defaults to
+\code{timepoint}}
+
+\item{.to}{Quoted variable name to hold new timepoint values.
+Defaults to \code{timepoint_norm}. If this is the same as \code{.from}, the values will
+be overwritten.}
+
+\item{.fromzero}{Logical, whether to shift timepoints to start from 0, defaults
+to TRUE.}
 }
 \value{
 \code{pitchtier_df} with modified \code{timepoint} column or new column
 specified by \code{.timepoint}
 }
 \description{
-Changes the timepoints to be between (0, 1]
+Normalizes the timepoints to be out of 1. If \code{.fromzero} is \code{TRUE}, all
+values will be subtracted by the first timepoint, making the domain \verb{[0,1]}.
+If \code{.fromzero} is \code{FALSE}, the domain will be \verb{(0,1]}.
 }

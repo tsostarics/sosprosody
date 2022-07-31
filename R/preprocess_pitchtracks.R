@@ -16,10 +16,15 @@
 #' between (0, 1] via `time_normalize`. Changes the time
 #' @param n_pulses Number of equally spaced pulses to extract via
 #' `extract_equal_pulses`
-#' @param .hz For `running_median_smooth`, quoted variable name for column to
-#' hold new Hz values. Defaults to Hz.
-#' @param .timepoint For `time_normalize`, quoted variable name for column to
-#' hold new timepoint values. Defaults to timepoint.
+#' @param .from_smooth For `running_median_smooth`, quoted variable name for
+#' column containing Hz values. Defaults to `hz`
+#' @param .to_smooth For `running_median_smooth`, quoted variable name for column to
+#' hold new Hz values. Defaults to `hz_norm`.
+#' @param .from_time For `time_normalize`, quoted variable name for column
+#' containing timepoint values. Defaults to `timepoint`.
+#' @param .to_time For `time_normalize`, quoted variable name for column to
+#' hold new timepoint values. Defaults to `timepoint_norm`.
+#' @param .fromzero For `time_normalize`, whether results should start from 0
 #'
 #' @return Dataframe with modified columns
 #' @export
@@ -28,8 +33,11 @@ preprocess_pitchtracks <- function(pitchtier_df,
                                    runmed_k,
                                    time_normalize,
                                    n_pulses,
-                                   .hz = 'hz',
-                                   .timepoint = 'timepoint') {
+                                   .from_smooth = 'hz',
+                                   .to_smooth = 'hz_runmed',
+                                   .from_time = 'timepoint',
+                                   .to_time = 'timepoint_norm',
+                                   .fromzero = TRUE) {
 
   if (!missing(nuclear_df)) {
     stopifnot(is.data.frame(nuclear_df))
@@ -37,10 +45,10 @@ preprocess_pitchtracks <- function(pitchtier_df,
   }
 
   if (!missing(runmed_k) && is.numeric(runmed_k))
-    pitchtier_df <- running_median_smooth(pitchtier_df, runmed_k)
+    pitchtier_df <- running_median_smooth(pitchtier_df, runmed_k, .from_smooth, .to_smooth)
 
-  if (time_normalize)
-    pitchtier_df <-  time_normalize(pitchtier_df)
+  if (!missing(time_normalize) && time_normalize)
+    pitchtier_df <-  time_normalize(pitchtier_df, .from_time, .to_time)
 
   if (!missing(n_pulses) && is.numeric(n_pulses)){
     pitchtier_df <- extract_equal_pulses(pitchtier_df, n_pulses)

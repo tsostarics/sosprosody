@@ -10,8 +10,11 @@ preprocess_pitchtracks(
   runmed_k,
   time_normalize,
   n_pulses,
-  .hz = "hz",
-  .timepoint = "timepoint"
+  .from_smooth = "hz",
+  .to_smooth = "hz_runmed",
+  .from_time = "timepoint",
+  .to_time = "timepoint_norm",
+  .fromzero = TRUE
 )
 }
 \arguments{
@@ -29,11 +32,19 @@ between (0, 1] via \code{time_normalize}. Changes the time}
 \item{n_pulses}{Number of equally spaced pulses to extract via
 \code{extract_equal_pulses}}
 
-\item{.hz}{For \code{running_median_smooth}, quoted variable name for column to
-hold new Hz values. Defaults to Hz.}
+\item{.from_smooth}{For \code{running_median_smooth}, quoted variable name for
+column containing Hz values. Defaults to \code{hz}}
 
-\item{.timepoint}{For \code{time_normalize}, quoted variable name for column to
-hold new timepoint values. Defaults to timepoint.}
+\item{.to_smooth}{For \code{running_median_smooth}, quoted variable name for column to
+hold new Hz values. Defaults to \code{hz_norm}.}
+
+\item{.from_time}{For \code{time_normalize}, quoted variable name for column
+containing timepoint values. Defaults to \code{timepoint}.}
+
+\item{.to_time}{For \code{time_normalize}, quoted variable name for column to
+hold new timepoint values. Defaults to \code{timepoint_norm}.}
+
+\item{.fromzero}{For \code{time_normalize}, whether results should start from 0}
 }
 \value{
 Dataframe with modified columns

@@ -21,8 +21,12 @@ get_nuclear_textgrids <- function(textgrid_df,
                                  is_nuclear = .data$word_label %in% nuclear_words)
   }
 
-
+  n_files <- length(unique(textgrid_df[['file']]))
   textgrid_df <- dplyr::filter(textgrid_df, .data$is_nuclear)
+  n_files_now <- length(unique(textgrid_df[['file']]))
+
+  if (n_files != n_files_now)
+    warning(glue::glue("Filtered textgrid contains {n_files-n_files_now} fewer files, did you forget a few nuclear words?"))
 
   if (.first)
     textgrid_df <-

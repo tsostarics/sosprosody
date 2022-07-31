@@ -9,13 +9,13 @@ code_nuclear_pulses(pitchtier_df, nuclear_df)
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtier}}
 
-\item{nuclear_df}{Nucler region dataframe, output of \code{get_nuclear_tg}}
+\item{nuclear_df}{Nuclear region dataframe, output of \code{get_nuclear_tg}}
 }
 \value{
 \code{pitchtier_df} but with a new logical column \code{is_nuclear}
 }
 \description{
 Given a pitchtier dataframe and a correponding nuclear region dataframe
-from \code{get_nuclear_tg}, code each pulse for each file on whether it lies
+from \code{get_nuclear_textgrid}, code each pulse for each file on whether it lies
 within the nuclear region or not
 }
