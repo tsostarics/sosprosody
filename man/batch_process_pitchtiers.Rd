@@ -4,10 +4,12 @@
 \alias{batch_process_pitchtiers}
 \title{Load multiple pitchtiers into wrangled dataframe}
 \usage{
-batch_process_pitchtiers(ptdir)
+batch_process_pitchtiers(ptdir, parallelize = FALSE)
 }
 \arguments{
 \item{ptdir}{Directory containing pitchtier files}
+
+\item{parallelize}{Logical, whether to run in parallel with \code{furrr::future_map_dfr}}
 }
 \value{
 Dataframe of the pitchtier information from each file

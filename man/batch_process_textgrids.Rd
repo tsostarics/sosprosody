@@ -4,10 +4,12 @@
 \alias{batch_process_textgrids}
 \title{Load multiple textgrids into wrangled dataframe}
 \usage{
-batch_process_textgrids(tgdir)
+batch_process_textgrids(tgdir, parallelize = TRUE)
 }
 \arguments{
 \item{tgdir}{Directory containing textgrids}
+
+\item{parallelize}{Logical, whether to run in parallel with \code{furrr::future_map_dfr}}
 }
 \value{
 Dataframe of the word and phone information from each textgrid

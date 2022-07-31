@@ -7,20 +7,28 @@
 #' `words` and `phones`, as given by the output of the Montreal forced aligner.
 #'
 #' @param tgdir Directory containing textgrids
+#' @param parallelize Logical, whether to run in parallel with `furrr::future_map_dfr`
 #'
 #' @return Dataframe of the word and phone information from each textgrid
 #' @export
-batch_process_textgrids <- function(tgdir) {
+batch_process_textgrids <- function(tgdir, parallelize = TRUE) {
   tg_files <- paste0(tgdir, list.files(tgdir,pattern = ".TextGrid$",ignore.case = TRUE))
+  map_fx <- purrr::map_dfr
+
+  if (parallelize) {
+    requireNamespace("furrr", quietly = TRUE)
+    map_fx <- furrr::future_map_dfr
+  }
+
   dat <-
-    purrr::map_dfr(
+    map_fx(
       tg_files,
       \(filepath)
-        nest_tiers(
-          textgrid_to_dataframes(
-            rPraat::tg.read(filepath)
-          )
+      nest_tiers(
+        textgrid_to_dataframes(
+          rPraat::tg.read(filepath)
         )
+      )
 
     )
 
