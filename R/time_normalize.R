@@ -23,8 +23,10 @@ time_normalize <- function(pitchtier_df,
   if (!.from %in% names(pitchtier_df))
     stop(glue::glue("Column `{.from}` not found in pitchtier_df"))
 
+  pitchtier_df <- group_by(pitchtier_df, file)
+
   if (.fromzero)
-    pitchtier_df[[.from]] <- pitchtier_df[[.from]] - min(pitchtier_df[[.from]])
+    pitchtier_df <- mutate(pitchtier_df, !!sym(.from) := !!sym(.from) - min(!!sym(.from)))
 
   pitchtier_df |>
     dplyr::group_by(file) |>

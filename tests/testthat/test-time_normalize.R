@@ -1,6 +1,6 @@
-test_that("time normalization works", {
+test_that("time normalization without from zero shifting works", {
   test_df <- data.frame(file = "test",
-             timepoint = seq(.1,2,by = .1))
+                        timepoint = seq(.1,2,by = .1))
 
   normed_df <- time_normalize(test_df, .fromzero = FALSE)
 
@@ -8,12 +8,13 @@ test_that("time normalization works", {
 })
 
 test_that("from zero shifting works", {
-  test_df <- data.frame(file = "test",
-                        timepoint = seq(.1,2,by = .1))
+  test_df <- data.frame(file = c(rep("a", 4), rep("b", 4)),
+                        timepoint = c(seq(.1, .4, by = .1),
+                                      seq(1.1, 1.4, by = .1)))
 
   normed_df <- time_normalize(test_df)
 
-  expect_equal(normed_df$timepoint_norm, seq(0,1.9,by=.1)/1.9)
+  expect_equal(normed_df$timepoint_norm, c(0, 1/3, 2/3, 1, 0, 1/3, 2/3, 1))
 })
 
 test_that("default names work", {
