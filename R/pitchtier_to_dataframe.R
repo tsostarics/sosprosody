@@ -24,7 +24,8 @@ pitchtier_to_dataframe <- function(pitchtier,
   if (add_semitones) {
     semitones <- hz_to_semitones(pt_df[['hz']], ...)
     pt_df[["semitone_difference"]] <- semitones
-    attr(pt_df, "semitones_from") <- attr(semitones, 'semitones_from')
+    .from <- attr(semitones, "semitones_from")
+    pt_df[['semitones_from']] <- .from
   }
 
   if (add_erbs) {
