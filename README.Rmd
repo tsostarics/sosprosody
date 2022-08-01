@@ -23,11 +23,72 @@ This package extends the `rPraat` package.
 
 ## Installation
 
-You can install the development version of sosprosody like so:
+You can install the development version of `sosprosody` like so:
 
 ``` r
 library(devtools)
-devtools::install_github('tsostarics/sosprosody)
+devtools::install_github('tsostarics/sosprosody')
 ```
 
-example coming soon
+## Examples
+
+This package provides `format` and `print` methods for TextGrid and PitchTier
+objects loaded with the respective read functions from `{rPraat}`
+
+```{r}
+#| warning: false
+library(rPraat)
+library(sosprosody)
+pitchtier <- pt.read("grandmother_LHH_003.PitchTier")
+textgrid <- tg.read("grandmother_LHH_003.TextGrid")
+
+pitchtier
+textgrid
+```
+
+Here's an example of processing all the textgrids and pitchtiers in a directory
+into dataframe representations.
+
+```{r}
+nuclear_words <- "grandmother"
+tg_df <- batch_process_textgrids("./")
+pt_df <- batch_process_pitchtiers("./")
+nuclear_regions <- get_nuclear_textgrids(tg_df, nuclear_words)
+
+str(tg_df)
+str(pt_df)
+```
+
+We can then do some common preprocessing steps, such as coding the nuclear word
+in the phrase, applying running median smoothing, and normalizing the timepoints.
+
+```{r}
+processed_pt_df <- preprocess_pitchtracks(pt_df,
+                                          nuclear_df = nuclear_regions, 
+                                          runmed_k = 5,
+                                          time_normalize = TRUE,
+                                          .fromzero = TRUE)
+```
+
+The processed pitch tier data frame can then be plotted like so:
+
+```{r}
+library(ggplot2)
+
+processed_pt_df |> 
+  ggplot(aes(x = timepoint_norm, 
+             y = hz_runmed, 
+             color = is_nuclear,
+             group = file)) +
+  geom_point() +
+  geom_line() +
+  # The rest is just for visuals
+  scale_color_brewer(palette = 'Dark2') +
+  theme_minimal() +
+  coord_fixed(ratio = 1/180) +
+  theme(legend.position = 'none') +
+  annotate(geom = "label", x = .9, y = 85, label = "L*+HLL") +
+  annotate(geom = "label", x = .75, y = 150, label = "LHH")
+```   
+ 
+ 
