@@ -6,11 +6,17 @@
 #' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
 #' @param n_pulses Number of pulses to extract, will be coerced to an integer.
 #' Note that each file must have at least this many pulses.
+#' @param .keep_indices Whether to keep original pulse indices along with the
+#' new indices. If averaging over pulses later, be sure to use `pulse_i`
 #'
 #' @return Filtered dataframe containing equally spaced pulses. The original
 #' pulse index is added as the `pulse_i` column.
 #' @export
-extract_equal_pulses <- function(pitchtier_df, n_pulses = 30) {
+#'
+#' @examples
+#'
+#' extract_equal_pulses(data.frame(file = 'a', hz = 9:18), n_pulses = 3, .keep_indices = TRUE)
+extract_equal_pulses <- function(pitchtier_df, n_pulses = 30, .keep_indices = FALSE) {
   n_pulses <- as.integer(n_pulses)
 
   # Determine how many pulses each file has
@@ -35,10 +41,17 @@ extract_equal_pulses <- function(pitchtier_df, n_pulses = 30) {
   names(pulse_indices) <- pulse_counts[['file']]
 
   # Extract the calculated pulses
-  pitchtier_df |>
+  pitchtier_df <-
+    pitchtier_df |>
     dplyr::group_by(file) |>
     dplyr::mutate(pulse_i = dplyr::row_number(),
                   keep_pulse = .data$pulse_i %in% pulse_indices[[dplyr::first(file)]]) |>
     dplyr::filter(.data$keep_pulse) |>
     dplyr::select(-'keep_pulse')
+
+  if (.keep_indices)
+    pitchtier_df[["old_pulse_i"]] <- pitchtier_df[['pulse_i']]
+
+  dplyr::mutate(pitchtier_df, pulse_i = dplyr::row_number())
+
 }

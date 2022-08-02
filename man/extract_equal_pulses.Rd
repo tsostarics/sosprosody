@@ -4,13 +4,16 @@
 \alias{extract_equal_pulses}
 \title{Extract equally spaced pulses}
 \usage{
-extract_equal_pulses(pitchtier_df, n_pulses = 30)
+extract_equal_pulses(pitchtier_df, n_pulses = 30, .keep_indices = FALSE)
 }
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}}
 
 \item{n_pulses}{Number of pulses to extract, will be coerced to an integer.
 Note that each file must have at least this many pulses.}
+
+\item{.keep_indices}{Whether to keep original pulse indices along with the
+new indices. If averaging over pulses later, be sure to use \code{pulse_i}}
 }
 \value{
 Filtered dataframe containing equally spaced pulses. The original
@@ -19,4 +22,8 @@ pulse index is added as the \code{pulse_i} column.
 \description{
 Given a pitchtier dataframe with a \code{file} column, extract a number of
 equally spaced pulses.
+}
+\examples{
+
+extract_equal_pulses(data.frame(file = 'a', hz = 9:18), n_pulses = 3, .keep_indices = TRUE)
 }

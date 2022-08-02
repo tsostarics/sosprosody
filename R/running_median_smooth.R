@@ -7,17 +7,20 @@
 #' @param .from Quoted variable name to pull Hz values from. Defaults to `.hz`
 #' @param .to Quoted variable name to put smoothed Hz values. Defaults to
 #' `runmed_hz`. If this is the same as `.from`, the values will be overwritten.
+#' @param .group Character vector of columns to group by, defaults to `'file'`
 #'
 #' @return `pitchtier_df` with modified `hz` column or new column specified by
 #' `.hz`
 #' @export
 #'
 #' @importFrom stats runmed
+#' @importFrom tidyselect all_of
 running_median_smooth <- function(pitchtier_df,
                                   .k = 5,
                                   .from = 'hz',
-                                  .to = 'runmed_hz') {
+                                  .to = 'runmed_hz',
+                                  .group = "file") {
   pitchtier_df |>
-    dplyr::group_by(file) |>
+    dplyr::group_by(across(all_of(.group))) |>
     dplyr::mutate(!!sym(.to) := runmed(!!sym(.from), k = .k))
 }
