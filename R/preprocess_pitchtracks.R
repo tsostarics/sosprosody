@@ -14,8 +14,6 @@
 #' the Hz values.
 #' @param time_normalize Logical, whether to normalize the pitch track to be
 #' between (0, 1] via `time_normalize`. Changes the time
-#' @param n_pulses Number of equally spaced pulses to extract via
-#' `extract_equal_pulses`
 #' @param .from_smooth For `running_median_smooth`, quoted variable name for
 #' column containing Hz values. Defaults to `hz`
 #' @param .to_smooth For `running_median_smooth`, quoted variable name for column to
@@ -32,7 +30,6 @@ preprocess_pitchtracks <- function(pitchtier_df,
                                    nuclear_df,
                                    runmed_k,
                                    time_normalize,
-                                   n_pulses,
                                    .from_smooth = 'hz',
                                    .to_smooth = 'hz_runmed',
                                    .from_time = 'timepoint',
@@ -49,10 +46,6 @@ preprocess_pitchtracks <- function(pitchtier_df,
 
   if (!missing(time_normalize) && time_normalize)
     pitchtier_df <-  time_normalize(pitchtier_df, .from_time, .to_time)
-
-  if (!missing(n_pulses) && is.numeric(n_pulses)){
-    pitchtier_df <- extract_equal_pulses(pitchtier_df, n_pulses)
-  }
 
   pitchtier_df
 }

@@ -1,6 +1,6 @@
 #' Piecewise extraction of equally spaced pitch pulses
 #'
-#' This is an extension of `extract_equal_pulses` which extracts equal pulses
+#' This is an extension of `extract_n_pulses` which extracts equal pulses
 #' within particular sections. This was written as a component of
 #' `average_pitchtracks`, where I needed to extract equally spaced pulses
 #' within prenuclear and nuclear regions separately so I could then take
@@ -26,7 +26,8 @@
 piecewise_extract_pulses <- function(raw_pitchtier_df,
                                      section_by = "is_nuclear",
                                      pulses_per_section,
-                                     time_by = 'timepoint_norm') {
+                                     time_by = 'timepoint_norm',
+                                     .grouping = 'file') {
   sections <- unique(raw_pitchtier_df[[section_by]]) |> as.character()
   n_specified <- length(pulses_per_section)
   n_sections <- length(sections)
@@ -77,7 +78,7 @@ piecewise_extract_pulses <- function(raw_pitchtier_df,
                    section_df <-
                      suppressMessages({
                        section_split[[section]] |>
-                         extract_equal_pulses(n_pulses = section_n_pulses) |>
+                         extract_n_pulses(n_pulses = section_n_pulses, .grouping = .grouping) |>
                          dplyr::mutate(pulse_i = .data$pulse_i + offsets[section]) |>
                          # Need to replace the original time values with timepoint_df
                          dplyr::select(-{{time_by}})
