@@ -1,0 +1,30 @@
+test_that("interpolate equal pulses works", {
+  tstdf <- data.frame(tstfile = c(rep("a",5),rep("b",5)),
+                      tsthz = c(seq(10,50,10),
+                                c(10,20,30,20,10)),
+                      tsttp = c(6:10,
+                                1:5))
+
+  int_df <- interpolate_equal_pulses(tstdf,
+                                     n_pulses = 10,
+                                     time_by = 'tsttp',
+                                     .pitchval = 'tsthz',
+                                     .grouping = 'tstfile')
+
+
+  answer_df <- data.frame(tstfile = c(rep("a",10),rep("b",10)),
+                          tsttp = round(c(seq(6,10,length.out = 10),
+                                          seq(1,5,length.out = 10)),2),
+                          tsthz = c(10, 14.44, 18.89, 23.33, 27.78,
+                                    32.22, 36.67, 41.11, 45.56, 50,
+                                    10, 14.44, 18.89, 23.33, 27.78,
+                                    27.78, 23.33, 18.89, 14.44, 10))
+
+  expect_equal(round(int_df$tsttp,2), answer_df$tsttp)
+  expect_equal(round(int_df$tsthz,2), answer_df$tsthz)
+  expect_equal(int_df$tstfile, answer_df$tstfile)
+  expect_equal(attr(int_df,'groups')$tstfile, c('a','b'))
+  # Check by visualization, the red points should be interpolated bw the black:
+  # plot(tstdf$tsttp, tstdf$tsthz); points(int_df$tsttp, int_df$tsthz, col='red')
+
+})

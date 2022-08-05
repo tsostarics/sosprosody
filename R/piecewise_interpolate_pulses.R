@@ -1,3 +1,32 @@
+#' Piecewise interpolation of equally spaced pitch pulses
+#'
+#' This is an extension of `interpolate_equal_pulses` which extracts equal pulses
+#' within particular sections. This was written as a component of
+#' `average_pitchtracks`, where I needed to extract equally spaced pulses
+#' within prenuclear and nuclear regions separately so I could then take
+#' averages within the sections. This function can also be useful if you
+#' want a lower resolution for one section but a higher resolution for another.
+#'
+#' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
+#' and preferably with time normalization already applied
+#' @param section_by Column name containing the section designations of the pitch contour
+#' @param pulses_per_section An integer vector of how many points to use
+#' for each section of the contour. This needs to have EITHER 1 value, which
+#' is recycled for all sections OR as many values as there are sections. In the
+#' latter case, it is HIGHLY RECOMMENDED that this vector is NAMED and in the
+#' desired order of the sections. If the vector is unnamed, it will use the
+#' names of the section in the order they appear in the data.
+#' @param time_by Quoted column name containing the timepoints, defaults to
+#' `"timepoint_norm"` (highly recommended to use `time_normalize` as a
+#' preprocessing step beforehand). Note that the results will have new
+#' time-normalized values with the same column name.
+#' @param .grouping Quoted column name indexing the unique recordings, defaults
+#' to `"file"`
+#' @param .pitchval Quoted column name for which pitch values to use, defaults
+#' to `"hz"`
+#'
+#' @return Dataframe of interpolated pitch pulses by section
+#' @export
 piecewise_interpolate_pulses <- function(pitchtier_df,
                                          section_by = "is_nuclear",
                                          pulses_per_section,
@@ -37,6 +66,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                    interpolated_df <-
                      interpolate_equal_pulses(pitchtier_df[pitchtier_df[[section_by]]==section,],
                                               n_pulses = section_n_pulses,
+                                              time_by = time_by,
                                               .pitchval = .pitchval,
                                               .grouping = .grouping) |>
                      dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offsets[section],
