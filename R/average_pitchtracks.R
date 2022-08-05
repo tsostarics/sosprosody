@@ -38,12 +38,12 @@
 #' @export
 #'
 #' @importFrom dplyr across
-average_pitchtracks <- function(raw_pitchtier_df,
-                                section_by,
-                                pulses_per_section,
-                                time_by = 'timepoint_norm',
-                                aggregate_by,
-                                .pitchval = 'hz') {
+average_pitchtracks2 <- function(raw_pitchtier_df,
+                                 section_by,
+                                 pulses_per_section,
+                                 time_by = 'timepoint_norm',
+                                 aggregate_by,
+                                 .pitchval = 'hz') {
   # TODO: if section by is missing, make a dummy column to hold the sections
   #       and remove it later so it can still be passed to piecewise extract
   stopifnot(section_by %in% names(raw_pitchtier_df))
@@ -59,10 +59,12 @@ average_pitchtracks <- function(raw_pitchtier_df,
   # Exctract equal pulses by section
   equal_pulse_df <-
     raw_pitchtier_df |>
-    dplyr::group_by(across(all_of(c(pulses_by)))) |>
-    piecewise_extract_pulses(section_by,
-                             pulses_per_section,
-                             time_by) |>
+    dplyr::group_by(across(all_of(c(pulses_by, aggregate_within)))) |>
+    piecewise_interpolate_pulses(section_by,
+                                 pulses_per_section,
+                                 time_by,
+                                 pulses_by,
+                                 .pitchval) |>
     dplyr::group_by(across(all_of(c(aggregate_within, "pulse_i", section_by))))
 
   avg_colname <- paste0("avg_", .pitchval)
