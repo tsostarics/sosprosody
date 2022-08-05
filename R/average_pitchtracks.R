@@ -29,7 +29,7 @@
 #' individual recordings, e.g. a `file` column. The RHS should index what you
 #' want to aggregate over, e.g. by `utterance` and `tune`. This would be written
 #' as `file ~ utterance + tune`. Unpredictable results may occur if recordings
-#' are not uniquely identifiable or if the LHS is not specified.
+#' are not uniquely identifiable by the column specified in the LHS.
 #' @param .pitchval Quoted column name containing the pitch values to average
 #' over. Defaults to `"hz"`
 #'

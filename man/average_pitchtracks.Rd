@@ -34,7 +34,7 @@ preprocessing step beforehand)}
 individual recordings, e.g. a \code{file} column. The RHS should index what you
 want to aggregate over, e.g. by \code{utterance} and \code{tune}. This would be written
 as \code{file ~ utterance + tune}. Unpredictable results may occur if recordings
-are not uniquely identifiable or if the LHS is not specified.}
+are not uniquely identifiable by the column specified in the LHS.}
 
 \item{.pitchval}{Quoted column name containing the pitch values to average
 over. Defaults to \code{"hz"}}
