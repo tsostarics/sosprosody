@@ -8,6 +8,8 @@
 #' Note that each file must have at least this many pulses.
 #' @param .keep_indices Whether to keep original pulse indices along with the
 #' new indices. If averaging over pulses later, be sure to use `pulse_i`
+#' @param .grouping Quoted column name indexing the unique recordings, defaults
+#' to `"file"`
 #'
 #' @return Filtered dataframe containing equally spaced pulses. The original
 #' pulse index is added as the `pulse_i` column.

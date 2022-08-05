@@ -1,13 +1,10 @@
-#' Piecewise extraction of equally spaced pitch pulses
+#' Piecewise extraction of n pitch pulses
 #'
 #' This is an extension of `extract_n_pulses` which extracts equal pulses
-#' within particular sections. This was written as a component of
-#' `average_pitchtracks`, where I needed to extract equally spaced pulses
-#' within prenuclear and nuclear regions separately so I could then take
-#' averages within the sections. This function can also be useful if you
+#' within particular sections.This function can be useful if you
 #' want a lower resolution for one section but a higher resolution for another.
 #'
-#' @param raw_pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
+#' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
 #' and preferably with time normalization already applied
 #' @param section_by Column name containing the section designations of the pitch contour
 #' @param pulses_per_section An integer vector of how many points to use
@@ -20,15 +17,17 @@
 #' `"timepoint_norm"` (highly recommended to use `time_normalize` as a
 #' preprocessing step beforehand). Note that the results will have new
 #' time-normalized values with the same column name.
+#' @param .grouping Quoted column name indexing the unique recordings, defaults
+#' to `"file"`
 #'
 #' @return Dataframe containing equally spaced pulses within separate sections
 #' @export
-piecewise_extract_pulses <- function(raw_pitchtier_df,
+piecewise_extract_pulses <- function(pitchtier_df,
                                      section_by = "is_nuclear",
                                      pulses_per_section,
                                      time_by = 'timepoint_norm',
                                      .grouping = 'file') {
-  sections <- unique(raw_pitchtier_df[[section_by]]) |> as.character()
+  sections <- unique(pitchtier_df[[section_by]]) |> as.character()
   n_specified <- length(pulses_per_section)
   n_sections <- length(sections)
 
@@ -54,7 +53,7 @@ piecewise_extract_pulses <- function(raw_pitchtier_df,
   # given in the desired order
   offsets <- c(0, cumsum(pulses_per_section)[-n_sections])
   names(offsets) <- sections
-  section_split <- split(raw_pitchtier_df, raw_pitchtier_df[[section_by]])
+  section_split <- split(pitchtier_df, pitchtier_df[[section_by]])
 
   purrr::map_dfr(sections,
                  \(section) {

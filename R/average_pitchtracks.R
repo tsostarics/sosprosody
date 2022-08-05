@@ -13,7 +13,7 @@
 #' average_pitchtracks(aggregate_by = file ~ utterance + tune + participant) |>
 #' average_pitchtracks(aggregate_by = participant ~ utterance + tune)
 #'
-#' @param raw_pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
+#' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
 #' and preferably with time normalization already applied
 #' @param section_by Column name containing the section designations of the pitch contour
 #' @param pulses_per_section An integer vector of how many points to use
@@ -38,7 +38,7 @@
 #' @export
 #'
 #' @importFrom dplyr across
-average_pitchtracks2 <- function(raw_pitchtier_df,
+average_pitchtracks <- function(pitchtier_df,
                                  section_by,
                                  pulses_per_section,
                                  time_by = 'timepoint_norm',
