@@ -46,7 +46,7 @@ average_pitchtracks <- function(pitchtier_df,
                                  .pitchval = 'hz') {
   # TODO: if section by is missing, make a dummy column to hold the sections
   #       and remove it later so it can still be passed to piecewise extract
-  stopifnot(section_by %in% names(raw_pitchtier_df))
+  stopifnot(section_by %in% names(pitchtier_df))
 
   # Parse formula, remove any +s, if one sided then use the RHS for both aggregates
   if (length(aggregate_by) == 2L)
@@ -58,7 +58,7 @@ average_pitchtracks <- function(pitchtier_df,
 
   # Exctract equal pulses by section
   equal_pulse_df <-
-    raw_pitchtier_df |>
+    pitchtier_df |>
     dplyr::group_by(across(all_of(c(pulses_by, aggregate_within)))) |>
     piecewise_interpolate_pulses(section_by,
                                  pulses_per_section,
