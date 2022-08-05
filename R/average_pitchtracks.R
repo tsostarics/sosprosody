@@ -48,13 +48,13 @@ average_pitchtracks <- function(pitchtier_df,
   #       and remove it later so it can still be passed to piecewise extract
   stopifnot(section_by %in% names(pitchtier_df))
 
-  # Parse formula, remove any +s, if one sided then use the RHS for both aggregates
-  if (length(aggregate_by) == 2L)
-    aggregate_by[[3]] <- aggregate_by[[2]]
-  aggregate_within <- as.character(aggregate_by[[3L]])
-  aggregate_within <- aggregate_within[which(aggregate_within != "+")]
-  pulses_by <- as.character(aggregate_by[[2L]])
-  pulses_by <- pulses_by[which(pulses_by != '+')]
+  if (length(aggregate_by) != 3)
+    stop("Formula for aggregate_by must be two-sided")
+  if (length(aggregate_by[[2]]) > 1)
+    stop("LHS must contain only one column identifying unique columns")
+
+  pulses_by <- all.vars(aggregate_by)[1L] # LHS term
+  aggregate_within <- labels(terms(aggregate_by)) # RHS terms
 
   # Exctract equal pulses by section
   equal_pulse_df <-

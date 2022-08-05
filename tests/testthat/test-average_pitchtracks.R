@@ -38,3 +38,11 @@ test_that("multiplication works", {
   #              shape = 4)
 
 })
+
+test_that("errors for bad formulas work", {
+  # The actual dataframe here doesnt matter since these errors happen early on
+  expect_error(average_pitchtracks(mtcars, section_by = 'cyl', aggregate_by = ~ gear),
+               regexp= "must be two")
+  expect_error(average_pitchtracks(mtcars, section_by = 'cyl', aggregate_by = cyl+gear ~ gear),
+               regexp="LHS must contain only one")
+})
