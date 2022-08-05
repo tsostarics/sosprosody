@@ -9,7 +9,6 @@ preprocess_pitchtracks(
   nuclear_df,
   runmed_k,
   time_normalize,
-  n_pulses,
   .from_smooth = "hz",
   .to_smooth = "hz_runmed",
   .from_time = "timepoint",
@@ -28,9 +27,6 @@ the Hz values.}
 
 \item{time_normalize}{Logical, whether to normalize the pitch track to be
 between (0, 1] via \code{time_normalize}. Changes the time}
-
-\item{n_pulses}{Number of equally spaced pulses to extract via
-\code{extract_equal_pulses}}
 
 \item{.from_smooth}{For \code{running_median_smooth}, quoted variable name for
 column containing Hz values. Defaults to \code{hz}}

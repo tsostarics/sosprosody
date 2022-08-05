@@ -5,16 +5,16 @@
 \title{Equally-spaced average pitch contours}
 \usage{
 average_pitchtracks(
-  raw_pitchtier_df,
-  section_by = "is_nuclear",
-  pulses_per_section = c(`FALSE` = 15, `TRUE` = 30),
+  pitchtier_df,
+  section_by,
+  pulses_per_section,
   time_by = "timepoint_norm",
-  aggregate_by = take ~ utterance + tune,
+  aggregate_by,
   .pitchval = "hz"
 )
 }
 \arguments{
-\item{raw_pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}
+\item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}
 and preferably with time normalization already applied}
 
 \item{section_by}{Column name containing the section designations of the pitch contour}
