@@ -38,6 +38,7 @@
 #' @export
 #'
 #' @importFrom dplyr across
+#' @importFrom stats terms
 average_pitchtracks <- function(pitchtier_df,
                                  section_by,
                                  pulses_per_section,
