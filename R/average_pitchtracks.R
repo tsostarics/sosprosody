@@ -32,6 +32,8 @@
 #' are not uniquely identifiable by the column specified in the LHS.
 #' @param .pitchval Quoted column name containing the pitch values to average
 #' over. Defaults to `"hz"`
+#' @param parallelize Whether to run in parallel via multisession
+#' `furrr::future_map_dfr`, passed on to `piecewise_interpolate_pulses`
 #'
 #' @return A dataframe containing the averaged and equally spaced piecewise
 #' pitch contours
@@ -40,11 +42,12 @@
 #' @importFrom dplyr across
 #' @importFrom stats terms
 average_pitchtracks <- function(pitchtier_df,
-                                 section_by,
-                                 pulses_per_section,
-                                 time_by = 'timepoint_norm',
-                                 aggregate_by,
-                                 .pitchval = 'hz') {
+                                section_by,
+                                pulses_per_section,
+                                time_by = 'timepoint_norm',
+                                aggregate_by,
+                                .pitchval = 'hz',
+                                parallelize = FALSE) {
   # TODO: if section by is missing, make a dummy column to hold the sections
   #       and remove it later so it can still be passed to piecewise extract
   stopifnot(section_by %in% names(pitchtier_df))
@@ -65,7 +68,8 @@ average_pitchtracks <- function(pitchtier_df,
                                  pulses_per_section,
                                  time_by,
                                  pulses_by,
-                                 .pitchval) |>
+                                 .pitchval,
+                                 paralellize) |>
     dplyr::group_by(across(all_of(c(aggregate_within, "pulse_i", section_by))))
 
   avg_colname <- paste0("avg_", .pitchval)

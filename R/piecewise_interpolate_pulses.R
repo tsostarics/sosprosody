@@ -24,6 +24,8 @@
 #' to `"file"`
 #' @param .pitchval Quoted column name for which pitch values to use, defaults
 #' to `"hz"`
+#' @param parallelize Whether to run in parallel via multisession
+#' `furrr::future_map_dfr`
 #'
 #' @return Dataframe of interpolated pitch pulses by section
 #' @export
@@ -32,11 +34,11 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                          pulses_per_section,
                                          time_by = 'timepoint_norm',
                                          .grouping = 'file',
-                                         .pitchval = 'hz') {
+                                         .pitchval = 'hz',
+                                         parallelize = FALSE) {
   sections <- unique(pitchtier_df[[section_by]]) |> as.character()
   n_specified <- length(pulses_per_section)
   n_sections <- length(sections)
-
   # Number of pulses should be recyclable or equal to number of
   # sections available in the data given by the grouping column
   stopifnot(n_specified == 1 || n_specified == n_sections)
@@ -59,18 +61,24 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   offsets <- c(0, cumsum(pulses_per_section)[-n_sections])
   names(offsets) <- sections
 
-  purrr::map_dfr(sections,
-                 \(section) {
-                   section_n_pulses <- pulses_per_section[section]
+  map_method <- purrr::map_dfr
+  if (parallelize) {
+    future::plan("multisession")
+    map_method <- furrr::future_map_dfr
+  }
 
-                   interpolated_df <-
-                     interpolate_equal_pulses(pitchtier_df[pitchtier_df[[section_by]]==section,],
-                                              n_pulses = section_n_pulses,
-                                              time_by = time_by,
-                                              .pitchval = .pitchval,
-                                              .grouping = .grouping) |>
-                     dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offsets[section],
-                                   !!sym(section_by) := section)
-                 }
+  map_method(sections,
+             \(section) {
+               section_n_pulses <- pulses_per_section[section]
+
+               interpolated_df <-
+                 interpolate_equal_pulses(pitchtier_df[pitchtier_df[[section_by]]==section,],
+                                          n_pulses = section_n_pulses,
+                                          time_by = time_by,
+                                          .pitchval = .pitchval,
+                                          .grouping = .grouping) |>
+                 dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offsets[section],
+                               !!sym(section_by) := section)
+             }
   )
 }

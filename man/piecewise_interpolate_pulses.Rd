@@ -10,7 +10,8 @@ piecewise_interpolate_pulses(
   pulses_per_section,
   time_by = "timepoint_norm",
   .grouping = "file",
-  .pitchval = "hz"
+  .pitchval = "hz",
+  parallelize = FALSE
 )
 }
 \arguments{
@@ -36,6 +37,9 @@ to \code{"file"}}
 
 \item{.pitchval}{Quoted column name for which pitch values to use, defaults
 to \code{"hz"}}
+
+\item{parallelize}{Whether to run in parallel via multisession
+\code{furrr::future_map_dfr}}
 }
 \value{
 Dataframe of interpolated pitch pulses by section

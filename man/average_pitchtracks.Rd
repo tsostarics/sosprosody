@@ -10,7 +10,8 @@ average_pitchtracks(
   pulses_per_section,
   time_by = "timepoint_norm",
   aggregate_by,
-  .pitchval = "hz"
+  .pitchval = "hz",
+  parallelize = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ are not uniquely identifiable by the column specified in the LHS.}
 
 \item{.pitchval}{Quoted column name containing the pitch values to average
 over. Defaults to \code{"hz"}}
+
+\item{parallelize}{Whether to run in parallel via multisession
+\code{furrr::future_map_dfr}, passed on to \code{piecewise_interpolate_pulses}}
 }
 \value{
 A dataframe containing the averaged and equally spaced piecewise
