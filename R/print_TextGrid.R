@@ -44,8 +44,16 @@ format.TextGrid <- function(x, ..., .horiz_res = 80L, .vert_res = 5L) {
            \(tier) {
              n_annotations <- length(tier[['label']])
              n_labels <- sum(tier[['label']] != '')
-             from_t <- round(min(tier[['t1']]), 2)
-             to_t <- round(max(tier[['t2']]), 2)
+
+             # Point tiers keep time in t, intervals in t1 & t2
+             which_from_t <- "t1"
+             which_to_t <- "t2"
+             if (tier[['type']] == "point") {
+               which_from_t <- "t"
+               which_to_t <- "t"
+             }
+             from_t <- round(min(tier[[which_from_t]]), 2)
+             to_t <- round(max(tier[[which_to_t]]), 2)
              string <- glue::glue("{tier[['name']]}: {n_labels}/{n_annotations} labeled {tier[['type']]}s from {from_t} to {to_t}")
              strtrim(string, .horiz_res)
            },
