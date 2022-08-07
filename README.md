@@ -3,6 +3,12 @@
 
 # sosprosody
 
+<!-- badges: start -->
+
+[![Codecov test
+coverage](https://codecov.io/gh/tsostarics/sosprosody/branch/main/graph/badge.svg)](https://app.codecov.io/gh/tsostarics/sosprosody?branch=main)
+<!-- badges: end -->
+
 This package includes a variety of helper functions involving praat,
 textgrids, pitchtiers, and intonation-related data wrangling. This has
 been written for my own research, but others may find it helpful as
