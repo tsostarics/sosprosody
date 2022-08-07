@@ -18,7 +18,8 @@ Imports:
     rPraat,
     stats,
     stringr,
-    tidyselect
+    tidyselect,
+    withr
 Suggests: 
     covr,
     testthat (>= 3.0.0)
