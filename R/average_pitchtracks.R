@@ -69,7 +69,7 @@ average_pitchtracks <- function(pitchtier_df,
                                  time_by,
                                  pulses_by,
                                  .pitchval,
-                                 paralellize) |>
+                                 parallelize) |>
     dplyr::group_by(across(all_of(c(aggregate_within, "pulse_i", section_by))))
 
   avg_colname <- paste0("avg_", .pitchval)
