@@ -39,7 +39,7 @@ get_praatscript_arguments <- function(script_path) {
   # Extract the arguments from the form
   arguments <-
     stringr::str_match_all(lines[seq(form_line + 1, endform_line - 1)],
-                           "\t([^ ]+) ([^ ]+) (.+)$") |>
+                           "\t([^ ]+) ([^ ]+) ?(.+)?$") |>
     lapply(\(args)
            args[-1])
 
