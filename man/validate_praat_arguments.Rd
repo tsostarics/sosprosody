@@ -15,7 +15,8 @@ validate_praat_arguments(script_path, use_defaults, ...)
 arguments contain spaces, they will be escaped for you.}
 }
 \value{
-
+Character vector of values to be passed to a command line
+praatscript invocation via Praat --run
 }
 \description{
 Given a script and named arguments, slot the arguments into the correct

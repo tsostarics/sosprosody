@@ -10,7 +10,8 @@
 #' @param ... *Named* list of arguments to pass to the script. If any character
 #' arguments contain spaces, they will be escaped for you.
 #'
-#' @return
+#' @return Character vector of values to be passed to a command line
+#' praatscript invocation via Praat --run
 #' @export
 validate_praat_arguments <- function(script_path, use_defaults, ...) {
   script_args <- get_praatscript_arguments(script_path)
