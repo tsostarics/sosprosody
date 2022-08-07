@@ -5,8 +5,10 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/tsostarics/sosprosody/workflows/R-CMD-check/badge.svg)](https://github.com/tsostarics/sosprosody/actions)
 [![Codecov test
 coverage](https://codecov.io/gh/tsostarics/sosprosody/branch/main/graph/badge.svg)](https://app.codecov.io/gh/tsostarics/sosprosody?branch=main)
+
 <!-- badges: end -->
 
 This package includes a variety of helper functions involving praat,
