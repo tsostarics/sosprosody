@@ -56,7 +56,7 @@ is_tier_list <- function(tier_list) {
                                all(tier[['t1']][-1] == tier[['t2']][-length(tier[['t2']])]),
                                TRUE)
   if (!all(timepoints_aligned))
-    stop(glue::glue("Interval timepoints not aligned on tiers {tier_names[!timepoints_aligned]}, `t2` should start with `t1[-1]`"))
+    stop(glue::glue("Interval timepoints not aligned on tiers {tier_names[!timepoints_aligned]}, `t2[1:n-1]` should equal `t1[2:n]`"))
 
   # The ending times of all interval tiers must equal each other
   max_times <- vapply(tier_list[tier_types == "interval"],
