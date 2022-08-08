@@ -9,6 +9,9 @@ local_praatscript <- function(..., env = parent.frame()) {
                "\tinteger val1 ",
                "\treal val2",
                "\treal val3 0.2",
+               "  optionmenu measure: 2   ",
+               " option not here",
+               " option this one",
                "endform"),
              con = "testscript.praat")
 
@@ -46,8 +49,8 @@ new_textgrid <- function() {
       name = "words",
       type = "interval",
       t1 = c(0, .1, .5, .7, 1.4),
-      t2 = c(.1, .5, .6, 1.4, 2),
-      label = c("", "a", "b", "c", "d", "")
+      t2 = c(.1, .5, .7, 1.4, 2),
+      label = c("", "a", "b", "c", "")
     )
 
   point_tier <-
@@ -55,7 +58,7 @@ new_textgrid <- function() {
       name = "tones",
       type = "point",
       t = c(.1, .5, .6, 1.6),
-      label = c("", "a", "b", "c", "d")
+      label = c("a", "b", "", "d")
     )
 
   textgrid <-
