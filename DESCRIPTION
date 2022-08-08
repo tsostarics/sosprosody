@@ -15,6 +15,7 @@ Imports:
     fs,
     glue,
     purrr,
+    readr,
     rlang,
     rPraat,
     stats,
