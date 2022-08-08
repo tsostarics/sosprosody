@@ -23,7 +23,7 @@ batch_process_pitchtiers <- function(ptdir, parallelize = FALSE) {
       pt_files,
       \(filepath)
         pitchtier_to_dataframe(
-          rPraat::pt.read(filepath),
+          rPraat::pt.read(filepath, encoding = 'auto'),
           .quiet = TRUE
         )
 

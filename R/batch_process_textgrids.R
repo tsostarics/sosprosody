@@ -26,7 +26,7 @@ batch_process_textgrids <- function(tgdir, parallelize = TRUE) {
       \(filepath)
       nest_tiers(
         textgrid_to_dataframes(
-          rPraat::tg.read(filepath)
+          rPraat::tg.read(filepath, encoding = 'auto')
         )
       )
 
