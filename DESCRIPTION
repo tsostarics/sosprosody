@@ -12,6 +12,7 @@ RoxygenNote: 7.1.2
 Imports: 
     crayon,
     dplyr,
+    fs,
     glue,
     purrr,
     rlang,
