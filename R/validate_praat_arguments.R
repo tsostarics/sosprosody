@@ -63,7 +63,7 @@ validate_praat_arguments <- function(script_path, use_defaults, ...) {
 .escape_strings <- function(strings) {
   vapply(strings,
          \(string) {
-           if (grepl("[[:space:]]", string))
+           if (grepl("[[:space:]^|$]", string))
              string <- paste0('"',string,'"')
            string
          },
