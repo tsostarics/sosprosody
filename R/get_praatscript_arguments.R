@@ -39,9 +39,12 @@ get_praatscript_arguments <- function(script_path) {
   # Extract the arguments from the form
   arguments <-
     stringr::str_match_all(lines[seq(form_line + 1, endform_line - 1)],
-                           "\t([^ ]+) ([^ ]+) ?(.+)?$") |>
+                           "[[:space:]]*([^ ]+) ([^ ]+) ?(.+)?$") |>
     lapply(\(args)
            args[-1])
+
+  # Catches any blank lines
+  arguments <- arguments[vapply(arguments,\(x) !identical(x,character(0)),TRUE)]
 
   # Filter out any comments
   arguments <- arguments[vapply(arguments, \(x) x[1] != 'comment',TRUE)]
