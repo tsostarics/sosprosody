@@ -12,5 +12,5 @@ coverage:
         target: auto
         threshold: 1%
         informational: true
-    ignore:
-      - "R/dt.R"
+ignore:
+  - "R/dt.R"
