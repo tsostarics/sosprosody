@@ -31,7 +31,7 @@ dt.read <- function(fileNameDurationTier, encoding = "UTF-8") {
   enc <- encoding
 
   if (encoding == "auto") {
-    enc <- rPraat::detectEncoding (fileNameDurationTier)
+    enc <- rPraat::detectEncoding(fileNameDurationTier)
   }
 
   if (enc == "UTF-8") {
