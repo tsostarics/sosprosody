@@ -226,11 +226,11 @@ dt.write <- function(pt, fileNameDurationTier, format = "spreadsheet") {
 }
 
 dt.write0 <- function(pt, fileNameDurationTier, format = "spreadsheet", fid = NULL, collection = FALSE) {
-  if (!isString(fileNameDurationTier)) {
+  if (!rPraat::isString(fileNameDurationTier)) {
     stop("Invalid 'fileNameDurationTier' parameter.")
   }
 
-  if (!isString(format)) {
+  if (!rPraat::isString(format)) {
     stop("Invalid 'format' parameter.")
   }
 
@@ -281,31 +281,50 @@ dt.write0 <- function(pt, fileNameDurationTier, format = "spreadsheet", fid = NU
   }
 
   if (format == "spreadsheet") {
-    wrLine(paste0(as.character(round2(xmin, -15)), " ", as.character(round2(xmax, -15)), " ", as.character(N)), fid)
+    wrLine(paste0(as.character(rPraat::round2(xmin, -15)), " ", as.character(rPraat::round2(xmax, -15)), " ", as.character(N)), fid)
   } else if (format == "short") {
-    wrLine(as.character(round2(xmin, -15)), fid)
-    wrLine(as.character(round2(xmax, -15)), fid)
+    wrLine(as.character(rPraat::round2(xmin, -15)), fid)
+    wrLine(as.character(rPraat::round2(xmax, -15)), fid)
     wrLine(as.character(N), fid)
   } else if (format == "text") {
-    wrLine(paste0("xmin = ", as.character(round2(xmin, -15)), " "), fid, collection)
-    wrLine(paste0("xmax = ", as.character(round2(xmax, -15)), " "), fid, collection)
+    wrLine(paste0("xmin = ", as.character(rPraat::round2(xmin, -15)), " "), fid, collection)
+    wrLine(paste0("xmax = ", as.character(rPraat::round2(xmax, -15)), " "), fid, collection)
     wrLine(paste0("points: size = ", as.character(N), " "), fid, collection)
   }
 
-  for (n in seqM(1, N)) {
+  for (n in rPraat::seqM(1, N)) {
     if (format == "spreadsheet" || format == "headerless") {
-      wrLine(paste0(as.character(round2(pt$t[n], -15)), "\t", as.character(round2(pt$f[n], -15))), fid)
+      wrLine(paste0(as.character(rPraat::round2(pt$t[n], -15)), "\t", as.character(rPraat::round2(pt$f[n], -15))), fid)
     } else if (format == "short") {
-      wrLine(as.character(round2(pt$t[n], -15)), fid)
-      wrLine(as.character(round2(pt$f[n], -15)), fid)
+      wrLine(as.character(rPraat::round2(pt$t[n], -15)), fid)
+      wrLine(as.character(rPraat::round2(pt$f[n], -15)), fid)
     } else if (format == "text") {
       wrLine(paste0("points [", as.character(n), "]:"), fid, collection)
-      wrLine(paste0("    number = ", as.character(round2(pt$t[n], -15)), " "), fid, collection)
-      wrLine(paste0("    value = ", as.character(round2(pt$f[n], -15)), " "), fid, collection)
+      wrLine(paste0("    number = ", as.character(rPraat::round2(pt$t[n], -15)), " "), fid, collection)
+      wrLine(paste0("    value = ", as.character(rPraat::round2(pt$f[n], -15)), " "), fid, collection)
     }
   }
 
   if (!collection) {
     close(fid)
   }
+}
+
+#' wrLine
+#'
+#' Taken from: https://github.com/bbTomas/rPraat/blob/master/R/rpraat.R
+#' because it wasn't exported from the package
+#'
+#' Write text line to a connection in binary mode.
+#'
+#' @param string Text line.
+#' @param fid A connection object.
+#' @param collectionFullText If TRUE, add extra 8 spaces at the beginning of the string
+#'
+#' @return a raw vector (if fid is a raw vector) or invisibly NULL.
+wrLine <- function(string, fid, collectionFullText = FALSE) {
+  if (collectionFullText) {
+    writeBin(charToRaw("        "), fid, endian = "little")
+  }
+  writeBin(c(charToRaw(enc2utf8(string)), as.raw(c(13, 10))), fid, endian = "little")
 }

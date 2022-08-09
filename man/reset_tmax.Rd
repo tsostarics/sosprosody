@@ -7,11 +7,19 @@
 reset_tmax(textgrid)
 }
 \arguments{
-\item{textgrid}{}
+\item{textgrid}{Textgrid object}
 }
 \value{
-
+The textgrid with an updated \code{tmax} attribute and modified
 }
 \description{
-Reset tmax in textgrid
+This is intended to only be used after applying a duration manipulation
+to a textgrid via \code{scale_textgrid_by_dt}. After a textgrid's duration is
+changed, the minimum and maximum time may also need to change accordingly
+to be earlier or later.
+}
+\details{
+Important: This function assumes that the final \code{t2} value in every interval
+tier is at the maximum time (i.e., duration), but I don't think this is
+necessarily a hard restriction on the format of TextGrids.
 }

@@ -21,8 +21,11 @@ Based on RealTier_getArea from RealTier.cpp
 https://github.com/praat/praat/blob/master/fon/RealTier.cpp
 }
 \details{
-Note that a scaling factor of 1/3 from 0 to 1 would yield an area here
-of -2/3 rather than 1/3.
+It's very important to remember that this function gives the area \strong{from 1},
+so a scaling factor of 1/3 from 0 to 1 would yield an area here
+of -2/3 rather than 1/3. Similarly, a scaling factor of 2 from 3 to 4 would
+return 1. This can be interpreted as the change in time necessary to yield
+a shrunk or compressed time.
 
 This could technically be used for pitch tiers too, in which case you would
 be calculating the integral of the pitch from 1. Not sure what use that

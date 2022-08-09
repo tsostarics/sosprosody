@@ -56,6 +56,6 @@ get_value_at_time <- function(tier_obj, t) {
   dist_left <- t - tleft
   dist_right <- tright - t
 
-  weighted.mean(c(fleft, fright),
-                c(dist_right, dist_left))
+  stats::weighted.mean(c(fleft, fright),
+                       c(dist_right, dist_left))
 }

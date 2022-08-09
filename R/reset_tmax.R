@@ -1,8 +1,17 @@
 #' Reset tmax in textgrid
 #'
-#' @param textgrid
+#' This is intended to only be used after applying a duration manipulation
+#' to a textgrid via `scale_textgrid_by_dt`. After a textgrid's duration is
+#' changed, the minimum and maximum time may also need to change accordingly
+#' to be earlier or later.
 #'
-#' @return
+#' Important: This function assumes that the final `t2` value in every interval
+#' tier is at the maximum time (i.e., duration), but I don't think this is
+#' necessarily a hard restriction on the format of TextGrids.
+#'
+#' @param textgrid Textgrid object
+#'
+#' @return The textgrid with an updated `tmax` attribute and modified
 reset_tmax <- function(textgrid) {
   old_tmax <- as.numeric(attr(textgrid, 'tmax'))
 
@@ -10,7 +19,7 @@ reset_tmax <- function(textgrid) {
 
   has_shrunk <- all(tiers_tmax < old_tmax)
 
-  new_tmax <- ifelse(has_shrunk, max(tiers_tmax), max(c(tiers_tmax, old_max)))
+  new_tmax <- ifelse(has_shrunk, max(tiers_tmax), max(c(tiers_tmax, old_tmax)))
 
   is_interval <- vapply(textgrid, \(tier) tier[['type']]=='interval', TRUE)
   for (tier in names(textgrid[is_interval])) {
