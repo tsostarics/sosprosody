@@ -21,7 +21,7 @@ add_tier <- function(textgrid,
                      new_tier_list,
                      filename = NULL,
                      ...) {
-  if (!is.null(filename)) {
+  if (is.null(filename)) {
     filename <- class(textgrid)['name']
   }
 
