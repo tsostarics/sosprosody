@@ -29,7 +29,7 @@ interpolate_equal_pulses <- function(pitchtier_df,
                                      .pitchval = "hz",
                                      .grouping = 'file') {
   n_pulses <- as.integer(n_pulses)
-  full_groupings <- c(as.character(dplyr::groups(pitchtier_df)), .grouping)
+  full_groupings <- unique(c(as.character(dplyr::groups(pitchtier_df)), .grouping))
 
   interpolated_df <-
     pitchtier_df |>
