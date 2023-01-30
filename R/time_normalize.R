@@ -12,6 +12,10 @@
 #' be overwritten.
 #' @param .fromzero Logical, whether to shift timepoints to start from 0, defaults
 #' to TRUE.
+#' @param .grouping Quoted column name indexing the unique recordings, defaults
+#' to `"file"`
+#' @param .overridegroups Logical, Whether to override the grouping structure of `pitchtier_df`
+#' with what's specified by `file`. Defaults to `FALSE`
 #'
 #' @return `pitchtier_df` with modified `timepoint` column or new column
 #' specified by `.timepoint`
@@ -19,16 +23,18 @@
 time_normalize <- function(pitchtier_df,
                            .from = 'timepoint',
                            .to = "timepoint_norm",
-                           .fromzero = TRUE) {
+                           .fromzero = TRUE,
+                           .grouping = 'file',
+                           .overridegroups = FALSE) {
   if (!.from %in% names(pitchtier_df))
     stop(glue::glue("Column `{.from}` not found in pitchtier_df"))
 
-  pitchtier_df <- dplyr::group_by(pitchtier_df, file)
+  full_groupings <- .get_groupings(pitchtier_df, .grouping, .overridegroups)
+  pitchtier_df <- dplyr::group_by(pitchtier_df, across(all_of(full_groupings)))
 
   if (.fromzero)
     pitchtier_df <- dplyr::mutate(pitchtier_df, !!sym(.from) := !!sym(.from) - min(!!sym(.from)))
 
   pitchtier_df |>
-    dplyr::group_by(file) |>
     dplyr::mutate(!!sym(.to) := !!sym(.from) / max(!!sym(.from)))
 }

@@ -9,7 +9,8 @@ interpolate_equal_pulses(
   n_pulses,
   time_by = "timepoint_norm",
   .pitchval = "hz",
-  .grouping = "file"
+  .grouping = "file",
+  .overridegroups = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ to \code{"hz"}}
 
 \item{.grouping}{Quoted column name indexing the unique recordings, defaults
 to \code{"file"}}
+
+\item{.overridegroups}{Logical, Whether to override the grouping structure of \code{pitchtier_df}
+with what's specified by \code{file}. Defaults to \code{FALSE}}
 }
 \value{
 Dataframe with interpolated pulses

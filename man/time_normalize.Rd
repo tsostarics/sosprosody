@@ -8,7 +8,9 @@ time_normalize(
   pitchtier_df,
   .from = "timepoint",
   .to = "timepoint_norm",
-  .fromzero = TRUE
+  .fromzero = TRUE,
+  .grouping = "file",
+  .overridegroups = FALSE
 )
 }
 \arguments{
@@ -23,6 +25,12 @@ be overwritten.}
 
 \item{.fromzero}{Logical, whether to shift timepoints to start from 0, defaults
 to TRUE.}
+
+\item{.grouping}{Quoted column name indexing the unique recordings, defaults
+to \code{"file"}}
+
+\item{.overridegroups}{Logical, Whether to override the grouping structure of \code{pitchtier_df}
+with what's specified by \code{file}. Defaults to \code{FALSE}}
 }
 \value{
 \code{pitchtier_df} with modified \code{timepoint} column or new column

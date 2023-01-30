@@ -20,6 +20,8 @@
 #' to `"file"`
 #' @param .pitchval Quoted column name for which pitch values to use, defaults
 #' to `"hz"`
+#' @param .overridegroups Logical, Whether to override the grouping structure of `pitchtier_df`
+#' with what's specified by `file`. Defaults to `FALSE`
 #'
 #' @return Dataframe with interpolated pulses
 #' @export
@@ -27,9 +29,10 @@ interpolate_equal_pulses <- function(pitchtier_df,
                                      n_pulses,
                                      time_by = "timepoint_norm",
                                      .pitchval = "hz",
-                                     .grouping = 'file') {
+                                     .grouping = 'file',
+                                     .overridegroups = FALSE) {
   n_pulses <- as.integer(n_pulses)
-  full_groupings <- unique(c(as.character(dplyr::groups(pitchtier_df)), .grouping))
+  full_groupings <- .get_groupings(pitchtier_df, .grouping, .overridegroups)
 
   interpolated_df <-
     pitchtier_df |>
@@ -45,7 +48,7 @@ interpolate_equal_pulses <- function(pitchtier_df,
   # Interpolate n_pulses between first and last timepoints
   group_vals <- unique(pitchtier_df[[.grouping]])
 
-  purrr::map_dfr(group_vals,
+  result <- purrr::map_dfr(group_vals,
                  \(grp) {
                    int_df <- interpolated_df[interpolated_df[[.grouping]] == grp,]
                    pt_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
@@ -55,4 +58,11 @@ interpolate_equal_pulses <- function(pitchtier_df,
                                                                   pt_df[[.pitchval]])
                    int_df
                  })
+
+  # If there are duplicates then the interpolation may end up dividing by 0 at some point
+  if (anyNA(result[[.pitchval]]))
+    warning("NA/NaNs detected in output, pitchtier_df$time_by likely has duplicates.")
+
+  result
 }
+

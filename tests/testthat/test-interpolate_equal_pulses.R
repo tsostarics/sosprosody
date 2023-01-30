@@ -5,6 +5,10 @@ test_that("interpolate equal pulses works", {
                       tsttp = c(6:10,
                                 1:5))
 
+  tst2 <- tstdf
+  tst2$tsttp[1:2] <- 7
+  tst2$tsthz[1:2] <- 20
+
   int_df <- interpolate_equal_pulses(tstdf,
                                      n_pulses = 10,
                                      time_by = 'tsttp',
@@ -20,6 +24,7 @@ test_that("interpolate equal pulses works", {
                                     10, 14.44, 18.89, 23.33, 27.78,
                                     27.78, 23.33, 18.89, 14.44, 10))
 
+  expect_warning(interpolate_equal_pulses(tst2, 10, 'tsttp', 'tsthz','tstfile'))
   expect_equal(round(int_df$tsttp,2), answer_df$tsttp)
   expect_equal(round(int_df$tsthz,2), answer_df$tsthz)
   expect_equal(int_df$tstfile, answer_df$tstfile)
