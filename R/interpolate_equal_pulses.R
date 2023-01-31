@@ -34,6 +34,7 @@ interpolate_equal_pulses <- function(pitchtier_df,
   n_pulses <- as.integer(n_pulses)
   full_groupings <- .get_groupings(pitchtier_df, .grouping, .overridegroups)
 
+  # Set up the timestamps of the new pulses to interpolate
   interpolated_df <-
     pitchtier_df |>
     dplyr::group_by(across(all_of(full_groupings))) |>
@@ -41,23 +42,26 @@ interpolate_equal_pulses <- function(pitchtier_df,
                      max_time = max(.data[[time_by]]),
                      .groups = "keep") |>
     dplyr::summarize(!!sym(time_by) := seq(.data[['min_time']],
-                                            .data[['max_time']],
-                                            length.out = n_pulses),
+                                           .data[['max_time']],
+                                           length.out = n_pulses),
                      .groups = "keep")
 
   # Interpolate n_pulses between first and last timepoints
   group_vals <- unique(pitchtier_df[[.grouping]])
 
-  result <- purrr::map_dfr(group_vals,
-                 \(grp) {
-                   int_df <- interpolated_df[interpolated_df[[.grouping]] == grp,]
-                   pt_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
+  result <-
+    purrr::map_dfr(group_vals,
+                   \(grp) {
+                     # Get only the current group timestamps and pitch vals
+                     int_df <- interpolated_df[interpolated_df[[.grouping]] == grp,]
+                     pt_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
 
-                   int_df[[.pitchval]] <- interpolate_pitchpoints(int_df[[time_by]],
-                                                                  pt_df[[time_by]],
-                                                                  pt_df[[.pitchval]])
-                   int_df
-                 })
+                     # Calculate the interpolated pitch values, add to interpolated df
+                     int_df[[.pitchval]] <- interpolate_pitchpoints(int_df[[time_by]],
+                                                                    pt_df[[time_by]],
+                                                                    pt_df[[.pitchval]])
+                     int_df
+                   })
 
   # If there are duplicates then the interpolation may end up dividing by 0 at some point
   if (anyNA(result[[.pitchval]]))
@@ -65,4 +69,3 @@ interpolate_equal_pulses <- function(pitchtier_df,
 
   result
 }
-
