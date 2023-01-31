@@ -33,3 +33,27 @@ test_that("interpolate equal pulses works", {
   # plot(tstdf$tsttp, tstdf$tsthz); points(int_df$tsttp, int_df$tsthz, col='red')
 
 })
+
+test_that("error when mismatching lengths with interpolation",
+          {
+expect_error(interpolate_pitchpoints(seq(6,9,20), 6:9, 6:10),regexp = "must have equal")
+          }
+
+)
+
+test_that("error when value exists outside of range",
+          {
+            expect_error(interpolate_pitchpoints(rep(6,6), rep(7,7), rep(7,7)),regexp = "inclusive range")
+            expect_error(interpolate_pitchpoints(rep(8,8), rep(7,7), rep(7,7)),regexp = "inclusive range")
+          }
+
+)
+
+test_that("all NaNs when input only contains duplicate pulse values", {
+  expect_equal(interpolate_pitchpoints(rep(7,3), rep(7,3), rep(7,3)), c(NaN, NaN, NaN))
+})
+
+test_that("one NaN when starting with a duplicate", {
+  expect_equal(interpolate_pitchpoints(6:9, c(6,6,8,9), c(10,10,30,40)),
+               c(NaN, 20, 30, 40))
+})

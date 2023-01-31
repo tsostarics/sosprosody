@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("piecewise interpolation works", {
   tstdf <- data.frame(tstfile = "f",
                       tstsec = c(rep("later",5),rep("earlier",5)),
                       tsthz = c(seq(10,50,10),
