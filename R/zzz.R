@@ -2,7 +2,9 @@ utils::globalVariables(c("prob", "section", "y"))
 
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  dplyr_version <- as.numeric(gsub("\\.","",packageVersion('dplyr')))
+  dplyr_version <- as.numeric(gsub("\\.","",
+                                   utils::packageVersion('dplyr'),
+                                   perl = TRUE))
 
   op.sosprosody <- list(
     sosprosody.reframe_fx = ifelse(dplyr_version <10999000,
