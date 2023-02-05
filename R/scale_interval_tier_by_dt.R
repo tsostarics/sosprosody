@@ -14,7 +14,7 @@ scale_interval_tier_by_dt <- function(int_tier,
 
   # note: add check for when there's only 1 boundary
 
-  subareas <- int_tier[['t1']][NA][-1L]
+  # subareas <- int_tier[['t1']][NA][-1L]
   new_t2 <- int_tier[['t2']]
 
 

@@ -63,14 +63,14 @@ average_pitchtracks <- function(pitchtier_df,
   # Exctract equal pulses by section
   equal_pulse_df <-
     pitchtier_df |>
-    dplyr::group_by(across(all_of(c(pulses_by, aggregate_within)))) |>
+    .group_by_vec(c(pulses_by, aggregate_within)) |>
     piecewise_interpolate_pulses(section_by,
                                  pulses_per_section,
                                  time_by,
                                  pulses_by,
                                  .pitchval,
                                  parallelize) |>
-    dplyr::group_by(across(all_of(c(aggregate_within, "pulse_i", section_by))))
+    .group_by_vec(c(aggregate_within, "pulse_i", section_by))
 
   avg_colname <- paste0("avg_", .pitchval)
 

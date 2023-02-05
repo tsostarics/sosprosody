@@ -19,9 +19,9 @@
 #'
 #' extract_n_pulses(data.frame(file = 'a', hz = 9:18), n_pulses = 3, .keep_indices = TRUE)
 extract_n_pulses <- function(pitchtier_df,
-                                 n_pulses = 30,
-                                 .keep_indices = FALSE,
-                                 .grouping = "file") {
+                             n_pulses = 30,
+                             .keep_indices = FALSE,
+                             .grouping = "file") {
   n_pulses <- as.integer(n_pulses)
 
   # Determine how many pulses each file has
@@ -48,7 +48,7 @@ extract_n_pulses <- function(pitchtier_df,
   # Extract the calculated pulses
   pitchtier_df <-
     pitchtier_df |>
-    dplyr::group_by(across(all_of(.grouping))) |>
+    .group_by_vec(.grouping) |>
     dplyr::mutate(pulse_i = dplyr::row_number(),
                   keep_pulse = .data$pulse_i %in% pulse_indices[[dplyr::first(.data[[.grouping]])]]) |>
     dplyr::filter(.data$keep_pulse) |>

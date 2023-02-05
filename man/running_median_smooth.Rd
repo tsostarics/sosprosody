@@ -9,7 +9,7 @@ running_median_smooth(
   .k = 5,
   .from = "hz",
   .to = "runmed_hz",
-  .group = "file"
+  .grouping = "file"
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ running_median_smooth(
 \item{.to}{Quoted variable name to put smoothed Hz values. Defaults to
 \code{runmed_hz}. If this is the same as \code{.from}, the values will be overwritten.}
 
-\item{.group}{Character vector of columns to group by, defaults to \code{'file'}}
+\item{.grouping}{Character vector of columns to group by, defaults to \code{'file'}}
 }
 \value{
 \code{pitchtier_df} with modified \code{hz} column or new column specified by
