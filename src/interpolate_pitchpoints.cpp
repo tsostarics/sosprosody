@@ -39,7 +39,7 @@ NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old
     double difference = 1;
 
     while (difference > 0) {
-      j = std::min(j + 1, max_j);
+      j++;
       difference = x - old_times[j];
     }
     left_times[i] = old_times[j - 1];
