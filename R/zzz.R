@@ -2,13 +2,13 @@ utils::globalVariables(c("prob", "section", "y"))
 
 .onLoad <- function(libname, pkgname) {
   op <- options()
-  dplyr_version <- as.numeric(gsub("\\.","",
-                                   utils::packageVersion('dplyr'),
-                                   perl = TRUE))
+
+  # If reframe doesn't exist, catch error and select summarize instead
+  fx <- tryCatch(dplyr::reframe, error = \(e) dplyr::summarize)
+
 
   op.sosprosody <- list(
-    sosprosody.reframe_fx = ifelse(dplyr_version <10999000,
-                                   \(x) dplyr::summarize(.groups = "drop"), dplyr::reframe)
+    sosprosody.reframe_fx = fx
   )
 
 
