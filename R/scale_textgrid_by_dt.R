@@ -10,6 +10,7 @@
 #' @param durationtier DurationTier object from `dt.read`
 #'
 #' @return The textgrid with modified time values for each tier
+#' @export
 scale_textgrid_by_dt <- function(textgrid, durationtier) {
   for (i in seq_along(textgrid)) {
     textgrid[[i]] <- scale_tier_by_dt(textgrid[[i]], durationtier)
