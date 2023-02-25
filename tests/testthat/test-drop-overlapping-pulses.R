@@ -14,9 +14,9 @@ test_that("juncture handling works", {
                                  .pitchval = 'tsthz',
                                  .grouping = 'tstfile')
 
-  adjusted_df_l <- adjust_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
-  adjusted_df_r <- adjust_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')
-  adjusted_df_b <- adjust_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
+  adjusted_df_l <- drop_overlapping_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
+  adjusted_df_r <- drop_overlapping_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')
+  adjusted_df_b <- drop_overlapping_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
 
   expect_equal(as.vector(xtabs(~tstsec,data =  adjusted_df_l)),
                c(20,29))

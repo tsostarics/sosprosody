@@ -85,12 +85,12 @@
 #'                                .pitchval = 'tsthz',
 #'                                .grouping = 'tstfile')
 #'
-#' adjusted_df_l <- adjust_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
-#' adjusted_df_r <- adjust_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')
-#' adjusted_df_b <- adjust_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
+#' adjusted_df_l <- drop_overlapping_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
+#' adjusted_df_r <- drop_overlapping_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')
+#' adjusted_df_b <- drop_overlapping_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
 #' }
 #'
-adjust_pulses <- function(pulse_df,
+drop_overlapping_pulses <- function(pulse_df,
                           keep,
                           time_by = 'timepoint',
                           pulse_col = 'pulse_i',
