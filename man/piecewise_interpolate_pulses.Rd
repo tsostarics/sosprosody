@@ -11,6 +11,7 @@ piecewise_interpolate_pulses(
   time_by = "timepoint_norm",
   .grouping = "file",
   .pitchval = "hz",
+  .sort = TRUE,
   parallelize = FALSE
 )
 }
@@ -38,7 +39,13 @@ to \code{"file"}}
 \item{.pitchval}{Quoted column name for which pitch values to use, defaults
 to \code{"hz"}}
 
-\item{parallelize}{Whether to run in parallel via multisession
+\item{.sort}{Logical, defaults to TRUE, whether to sort the dataframe
+by the values in \code{time_by} for each group specified by \code{.grouping}. If your
+dataframe is large, you should consider pre-sorting it before passing to this
+function & set this to FALSE. The sorting is needed to ensure that the pulse
+indices are in the correct order.}
+
+\item{parallelize}{Logical, defaults to FALSE, whether to run in parallel via multisession
 \code{furrr::future_map_dfr}}
 }
 \value{
@@ -46,9 +53,17 @@ Dataframe of interpolated pitch pulses by section
 }
 \description{
 This is an extension of \code{interpolate_equal_pulses} which extracts equal pulses
-within particular sections. This was written as a component of
+within particular sections of a time series. This was written as a component of
 \code{average_pitchtracks}, where I needed to extract equally spaced pulses
 within prenuclear and nuclear regions separately so I could then take
 averages within the sections. This function can also be useful if you
 want a lower resolution for one section but a higher resolution for another.
+}
+\details{
+Note that if you have two sections that share a boundary, you will get
+two pulses at the same timepoint-- one associated with the end of the first
+section, the other at the start of the second. If you plot the pulse indices
+you'll encounter cases where there's no change from one pulse to another
+at these shared timestamps. If you want to remove one of them, please refer
+to \code{adjust_pulses()}.
 }

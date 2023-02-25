@@ -1,11 +1,18 @@
 #' Piecewise interpolation of equally spaced pitch pulses
 #'
 #' This is an extension of `interpolate_equal_pulses` which extracts equal pulses
-#' within particular sections. This was written as a component of
+#' within particular sections of a time series. This was written as a component of
 #' `average_pitchtracks`, where I needed to extract equally spaced pulses
 #' within prenuclear and nuclear regions separately so I could then take
 #' averages within the sections. This function can also be useful if you
 #' want a lower resolution for one section but a higher resolution for another.
+#'
+#' Note that if you have two sections that share a boundary, you will get
+#' two pulses at the same timepoint-- one associated with the end of the first
+#' section, the other at the start of the second. If you plot the pulse indices
+#' you'll encounter cases where there's no change from one pulse to another
+#' at these shared timestamps. If you want to remove one of them, please refer
+#' to `adjust_pulses()`.
 #'
 #' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
 #' and preferably with time normalization already applied
@@ -24,8 +31,13 @@
 #' to `"file"`
 #' @param .pitchval Quoted column name for which pitch values to use, defaults
 #' to `"hz"`
-#' @param parallelize Whether to run in parallel via multisession
+#' @param parallelize Logical, defaults to FALSE, whether to run in parallel via multisession
 #' `furrr::future_map_dfr`
+#' @param .sort Logical, defaults to TRUE, whether to sort the dataframe
+#' by the values in `time_by` for each group specified by `.grouping`. If your
+#' dataframe is large, you should consider pre-sorting it before passing to this
+#' function & set this to FALSE. The sorting is needed to ensure that the pulse
+#' indices are in the correct order.
 #'
 #' @return Dataframe of interpolated pitch pulses by section
 #' @export
@@ -35,7 +47,15 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                          time_by = 'timepoint_norm',
                                          .grouping = 'file',
                                          .pitchval = 'hz',
+                                         .sort = TRUE,
                                          parallelize = FALSE) {
+  # Ensure timepoints are ordered (if not sorted the pulse indices may be wrong)
+  if (.sort)
+    pitchtier_df <-
+      pitchtier_df |>
+      .group_by_vec(.grouping) |>
+      dplyr::arrange(.data[[time_by]],.by_group = TRUE)
+
   sections <- unique(pitchtier_df[[section_by]]) |> as.character()
   n_specified <- length(pulses_per_section)
   n_sections <- length(sections)
@@ -43,8 +63,9 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   # sections available in the data given by the grouping column
   stopifnot(n_specified == 1 || n_specified == n_sections)
 
-  # If recyclable, create vector to us
-  pulses_per_section <- rep(pulses_per_section, n_sections)
+  # If one value is passed, recycle for each of the sections
+  if (n_specified == 1)
+    pulses_per_section <- rep(pulses_per_section, n_sections)
 
   # If names were not provided, or n pulses was recyclable, then the
   # vector will have no names, so we'll set to the section names

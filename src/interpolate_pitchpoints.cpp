@@ -33,7 +33,7 @@ NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old
   NumericVector left_points(n, NA_REAL), right_points(n, NA_REAL);
   NumericVector interpolated_values(n, NA_REAL);
 
-  int j = 0, max_j = ot_size - 1;
+  int j = 0;
   for (int i = 0; i < n; i++) {
     double x = new_times[i];
     double difference = 1;
