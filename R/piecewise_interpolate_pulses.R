@@ -96,7 +96,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   # Get unique indices for each interval, guess if not provided
   if (is.null(index_column)) {
-    as.integer(factor())
     pitchtier_df <- pitchtier_df |>
       dplyr::mutate(sosprosody_interval_i  = guess_interval_indices(.data[[section_by]]))
     index_column <- 'sosprosody_interval_i'
@@ -123,6 +122,9 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
         .group_by_vec(index_column) |>
         dplyr::group_split() |>
         map_method( \(section_df) {
+          if (nrow(section_df) == 1L)
+            stop(
+"Section only has one value, likely due to too much overlap after sorting.\nThis can also be caused by grouping by the index column but not providing it directly.\nRecommended to provide index_column to fix. Quitting to avoid R crash.")
           section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
           interval_idx <- section_df[[index_column]][1L]
           section_label <- section_df[[section_by]][1L]
