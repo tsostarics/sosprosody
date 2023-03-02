@@ -154,19 +154,24 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   # If no recyclable value is set
   if (n_empty == 0) {
-    # # of sections in pulses_per_sections must equal # of unique sections
-    if (length(pps_names) != length(unique_sections)) {
-      sections_not_set <- paste0(unique_sections[!unique_sections %in% pps_names], collapse = ", ")
-      stop("Section not specified in pulses_per_section but no recyclable value is set: {sections_not_set}")
+
+    # If there are some names set
+    if (!is.null(pps_names)) {
+      # # of sections in pulses_per_sections must equal # of unique sections
+      if (!is.null(pps_names) & length(pps_names)  != length(unique_sections)) {
+        sections_not_set <- paste0(unique_sections[!unique_sections %in% pps_names], collapse = ", ")
+        stop(glue::glue("Section not specified in pulses_per_section but no recyclable value is set: {sections_not_set}"))
+      }
+
+      # Names of pulses_per_sections must all exist in unique sections
+      if (!all(is_section_name)) {
+        not_existing_sections <- paste0(pps_names[!is_section_name], collapse = ', ')
+        stop(glue::glue("Section names not found: {not_existing_sections}"))
+      }
+
+      return(pulses_per_section)
     }
 
-    # Names of pulses_per_sections must all exist in unique sections
-    if (!all(is_section_name)) {
-      not_existing_sections <- paste0(pps_names[!is_section_name], collapse = ', ')
-      stop(glue::glue("Section names not found: {not_existing_sections}"))
-    }
-
-    return(pulses_per_section)
   }
 
   # Only one recyclable value should be set

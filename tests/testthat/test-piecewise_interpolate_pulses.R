@@ -166,3 +166,4 @@ test_that("multiple files works", {
   expect_equal(attr(int_df,'groups')$tstfile, c("b", "f"))
   expect_equal(int_df$pulse_i, answer_pulse_i)
 })
+
