@@ -8,7 +8,7 @@ piecewise_interpolate_pulses(
   pitchtier_df,
   section_by = "is_nuclear",
   pulses_per_section,
-  index_column,
+  index_column = NULL,
   time_by = "timepoint_norm",
   .grouping = "file",
   .pitchval = "hz",
@@ -28,6 +28,17 @@ is recycled for all sections OR as many values as there are sections. In the
 latter case, it is HIGHLY RECOMMENDED that this vector is NAMED and in the
 desired order of the sections. If the vector is unnamed, it will use the
 names of the section in the order they appear in the data.}
+
+\item{index_column}{String, column name containing numeric indices of each
+interval to extract pulses from. This really needs to be provided if you have
+two adjacent intervals that have the same label in the column \code{section_by}.
+Without unique indices differentiating them, this function will treat them
+as one "long" interval. If and only if you do not have this case present in
+your data, then you do not need to provide this. Leave it as NULL if
+you don't have the indices in your dataframe & the function will try to
+assign numeric indices based on when the labels in \code{section_by} change. If
+you do have them, but don't have the case previously described with adjacent
+labeled intervals, still provide the column name to save computation time.}
 
 \item{time_by}{Quoted column name containing the timepoints, defaults to
 \code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
