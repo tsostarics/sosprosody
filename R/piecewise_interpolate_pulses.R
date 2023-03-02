@@ -90,7 +90,8 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   if (.sort)
     pitchtier_df <-
     pitchtier_df |>
-    dplyr::arrange(.data[[section_by]], .data[[time_by]], .by_group = TRUE)
+    dplyr::arrange(.data[[section_by]], .by_group = TRUE) |>
+    dplyr::arrange(.data[[time_by]], .by_group = TRUE)
 
 
   # Get unique indices for each interval, guess if not provided
