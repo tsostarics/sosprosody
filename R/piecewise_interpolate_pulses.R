@@ -122,7 +122,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
           section_df <- .group_by_vec(section_df, full_groupings)
           interval_idx <- section_df[[index_column]][1L]
           section_label <- section_df[[section_by]][1]
-          section_n_pulses <- pulses_per_section[section_label]
+          section_n_pulses <- pulses_per_section[as.character(section_label)]
           offset <- offsets[as.character(interval_idx)]
 
           int_df <- interpolate_equal_pulses(section_df,
