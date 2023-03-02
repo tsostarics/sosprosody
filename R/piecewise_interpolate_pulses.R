@@ -7,22 +7,38 @@
 #' averages within the sections. This function can also be useful if you
 #' want a lower resolution for one section but a higher resolution for another.
 #'
+#' It is highly recommended that you also have a column that denotes a numeric
+#' index for each section. For example, if you have three sections that share
+#' the label `"word"`, then these will all be treated as the same, ONE, section
+#' if there are no other sections in between each word. So, a separate column
+#' distinguishing word-1 from word-2 from word-3 is needed. This should be
+#' passed to `index_column`. If you don't have this precomputed, this function
+#' will try to guess by assigning indices to contiguous groups, but, if you
+#' have any sections that overlap, you may get incorrect results.
+#'
 #' Note that if you have two sections that share a boundary, you will get
 #' two pulses at the same timepoint-- one associated with the end of the first
 #' section, the other at the start of the second. If you plot the pulse indices
 #' you'll encounter cases where there's no change from one pulse to another
 #' at these shared timestamps. If you want to remove one of them, please refer
-#' to `adjust_pulses()`.
+#' to `drop_overlapping_pulses()`.
 #'
 #' @param pitchtier_df Pitchtier dataframe, output of `batch_process_pitchtiers`
 #' and preferably with time normalization already applied
 #' @param section_by Column name containing the section designations of the pitch contour
-#' @param pulses_per_section An integer vector of how many points to use
-#' for each section of the contour. This needs to have EITHER 1 value, which
-#' is recycled for all sections OR as many values as there are sections. In the
-#' latter case, it is HIGHLY RECOMMENDED that this vector is NAMED and in the
-#' desired order of the sections. If the vector is unnamed, it will use the
-#' names of the section in the order they appear in the data.
+#' @param pulses_per_section A named integer vector of how many points to use
+#' for each section of the contour. There are three cases possible here.
+#'
+#'  - 1 and only 1 unnamed value is provided, which is recycled for all sections.
+#'  For example: c(10) for 10 pulses for all sections.
+#'  - All unique section names are specified with some number of pulses. So, if
+#'  you have 5 sections, this vector should be named and of length 5. For
+#'  example: c('a' = 10, 'b' = 30, 'c' = 20)
+#'  - A partially named integer vector with 1 unnamed value. The names should be
+#'  valid section names that exist in the `section_by` column. The 1 unnamed
+#'  value will be recycled for all sections that are not specified. For example:
+#'  c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
+#'
 #' @param index_column String, column name containing numeric indices of each
 #' interval to extract pulses from. This really needs to be provided if you have
 #' two adjacent intervals that have the same label in the column `section_by`.
@@ -74,7 +90,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   if (.sort)
     pitchtier_df <-
     pitchtier_df |>
-    dplyr::arrange(.data[[time_by]], .data[[section_by]], .by_group = TRUE)
+    dplyr::arrange(.data[[section_by]], .data[[time_by]], .by_group = TRUE)
 
 
   # Get unique indices for each interval, guess if not provided
@@ -137,6 +153,8 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   # Get the names from pulses_per_section and get the number of unnamed elements
   pps_names <- names(pulses_per_section)
   is_unnamed_value <- pps_names == ""
+  if (identical(is_unnamed_value, logical(0)))
+    is_unnamed_value <- TRUE
   n_empty <- sum(is_unnamed_value)
 
   is_section_name <- pps_names[!is_unnamed_value] %in% unique_sections

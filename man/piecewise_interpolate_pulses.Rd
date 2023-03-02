@@ -22,12 +22,19 @@ and preferably with time normalization already applied}
 
 \item{section_by}{Column name containing the section designations of the pitch contour}
 
-\item{pulses_per_section}{An integer vector of how many points to use
-for each section of the contour. This needs to have EITHER 1 value, which
-is recycled for all sections OR as many values as there are sections. In the
-latter case, it is HIGHLY RECOMMENDED that this vector is NAMED and in the
-desired order of the sections. If the vector is unnamed, it will use the
-names of the section in the order they appear in the data.}
+\item{pulses_per_section}{A named integer vector of how many points to use
+for each section of the contour. There are three cases possible here.
+\itemize{
+\item 1 and only 1 unnamed value is provided, which is recycled for all sections.
+For example: c(10) for 10 pulses for all sections.
+\item All unique section names are specified with some number of pulses. So, if
+you have 5 sections, this vector should be named and of length 5. For
+example: c('a' = 10, 'b' = 30, 'c' = 20)
+\item A partially named integer vector with 1 unnamed value. The names should be
+valid section names that exist in the \code{section_by} column. The 1 unnamed
+value will be recycled for all sections that are not specified. For example:
+c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
+}}
 
 \item{index_column}{String, column name containing numeric indices of each
 interval to extract pulses from. This really needs to be provided if you have
@@ -72,10 +79,19 @@ averages within the sections. This function can also be useful if you
 want a lower resolution for one section but a higher resolution for another.
 }
 \details{
+It is highly recommended that you also have a column that denotes a numeric
+index for each section. For example, if you have three sections that share
+the label \code{"word"}, then these will all be treated as the same, ONE, section
+if there are no other sections in between each word. So, a separate column
+distinguishing word-1 from word-2 from word-3 is needed. This should be
+passed to \code{index_column}. If you don't have this precomputed, this function
+will try to guess by assigning indices to contiguous groups, but, if you
+have any sections that overlap, you may get incorrect results.
+
 Note that if you have two sections that share a boundary, you will get
 two pulses at the same timepoint-- one associated with the end of the first
 section, the other at the start of the second. If you plot the pulse indices
 you'll encounter cases where there's no change from one pulse to another
 at these shared timestamps. If you want to remove one of them, please refer
-to \code{adjust_pulses()}.
+to \code{drop_overlapping_pulses()}.
 }
