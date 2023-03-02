@@ -47,6 +47,7 @@ average_pitchtracks <- function(pitchtier_df,
                                 time_by = 'timepoint_norm',
                                 aggregate_by,
                                 .pitchval = 'hz',
+                                .index_column = NULL,
                                 parallelize = FALSE) {
   # TODO: if section by is missing, make a dummy column to hold the sections
   #       and remove it later so it can still be passed to piecewise extract
@@ -64,11 +65,12 @@ average_pitchtracks <- function(pitchtier_df,
   equal_pulse_df <-
     pitchtier_df |>
     .group_by_vec(c(pulses_by, aggregate_within)) |>
-    piecewise_interpolate_pulses(section_by,
-                                 pulses_per_section,
-                                 time_by,
-                                 pulses_by,
-                                 .pitchval,
+    piecewise_interpolate_pulses(section_by = section_by,
+                                 pulses_per_section = pulses_per_section,
+                                 time_by = time_by,
+                                 index_column = .index_column,
+                                 .grouping = pulses_by,
+                                 .pitchval = .pitchval,
                                  parallelize) |>
     .group_by_vec(c(aggregate_within, "pulse_i", section_by))
 

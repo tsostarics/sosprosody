@@ -44,43 +44,52 @@
 piecewise_interpolate_pulses <- function(pitchtier_df,
                                          section_by = "is_nuclear",
                                          pulses_per_section,
+                                         index_column = NULL,
                                          time_by = 'timepoint_norm',
                                          .grouping = 'file',
                                          .pitchval = 'hz',
                                          .sort = TRUE,
                                          parallelize = FALSE) {
+  DROP_INDEX <- FALSE
+  pitchtier_df_cols <- colnames(pitchtier_df)
+  stopifnot(section_by %in% pitchtier_df_cols)
+  stopifnot(time_by %in% pitchtier_df_cols)
+
+
+  pitchtier_df <-
+    pitchtier_df |>
+    .group_by_vec(.grouping)
+
   # Ensure timepoints are ordered (if not sorted the pulse indices may be wrong)
   if (.sort)
     pitchtier_df <-
       pitchtier_df |>
-      .group_by_vec(.grouping) |>
       dplyr::arrange(.data[[time_by]],.by_group = TRUE)
 
-  sections <- unique(pitchtier_df[[section_by]]) |> as.character()
-  n_specified <- length(pulses_per_section)
-  n_sections <- length(sections)
-  # Number of pulses should be recyclable or equal to number of
-  # sections available in the data given by the grouping column
-  stopifnot(n_specified == 1 || n_specified == n_sections)
 
-  # If one value is passed, recycle for each of the sections
-  if (n_specified == 1)
-    pulses_per_section <- rep(pulses_per_section, n_sections)
+  # Get unique indices for each interval, guess if not provided
+  if (is.null(index_column)) {
 
-  # If names were not provided, or n pulses was recyclable, then the
-  # vector will have no names, so we'll set to the section names
-  if (is.null(names(pulses_per_section)))
-    names(pulses_per_section) <- sections
+    interval_indices <- .guess_interval_indices(pitchtier_df[[section_by]])
+    index_column <- as.character(round(rnorm(1,5), 5) + .0001)
+    pitchtier_df[[index_column]] <- interval_indices
+    DROP_INDEX <- TRUE
+  } else {
+    stopifnot(is.character(index_column) & (length(index_column) == 1))
 
-  # If names were provided in the pulses_per_section vector,
-  # ensure that all the names are actually in the grouping column
-  stopifnot(all(names(pulses_per_section) %in% sections))
+    stopifnot(index_column %in% pitchtier_df_cols)
+    interval_indices <- pitchtier_df[[index_column]]
 
-  # Offsets for the pulse indices based on the section they're in
-  # note that this is why the names of pulses_per_section must be
-  # given in the desired order
-  offsets <- c(0, cumsum(pulses_per_section)[-n_sections])
-  names(offsets) <- sections
+    stopifnot(is.numeric(interval_indices))
+  }
+
+  # Use unique intervals and section names to set appropriate # of pulses
+  unique_sections <- as.character(unique(pitchtier_df[[section_by]]))
+  pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
+
+  offsets <- .compute_offsets(pulses_per_section,
+                              pitchtier_df[[section_by]],
+                              interval_indices)
 
   map_method <- purrr::map_dfr
   if (parallelize) {
@@ -88,18 +97,134 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
     map_method <- furrr::future_map_dfr
   }
 
-  map_method(sections,
-             \(section) {
-               section_n_pulses <- pulses_per_section[section]
+  sections <- unique(interval_indices)
 
-               interpolated_df <-
-                 interpolate_equal_pulses(pitchtier_df[pitchtier_df[[section_by]]==section,],
-                                          n_pulses = section_n_pulses,
-                                          time_by = time_by,
-                                          .pitchval = .pitchval,
-                                          .grouping = .grouping) |>
-                 dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offsets[section],
-                               !!sym(section_by) := section)
-             }
-  )
+  pitchtier_df |>
+    split(f = pitchtier_df[[index_column]],drop = DROP_INDEX) |>
+    map_method( \(section_df) {
+      interval_idx <- section_df[[index_column]][1L]
+      section_label <- section_df[[section_by]][1]
+      section_n_pulses <- pulses_per_section[section_label]
+      offset <- offsets[as.character(interval_idx)]
+
+      int_df <- interpolate_equal_pulses(section_df,
+                               n_pulses = section_n_pulses,
+                               time_by = time_by,
+                               .pitchval = .pitchval,
+                               .grouping = .grouping) |>
+        dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offset,
+                      !!sym(section_by) := section_label)
+
+      if (!DROP_INDEX)
+        int_df[[index_column]] <- interval_idx
+
+      int_df
+    })
+}
+
+.fill_pps <- function(pulses_per_section, unique_sections) {
+  # Temp value to recycle later
+  recycled_pulse_value <- 10
+
+  # Get the names from pulses_per_section and get the number of unnamed elements
+  pps_names <- names(pulses_per_section)
+  is_unnamed_value <- pps_names == ""
+  n_empty <- sum(is_unnamed_value)
+
+  is_section_name <- pps_names[!is_unnamed_value] %in% unique_sections
+
+  # If no recyclable value is set
+  if (n_empty == 0) {
+    # # of sections in pulses_per_sections must equal # of unique sections
+    if (length(pps_names) != length(unique_sections)) {
+      sections_not_set <- paste0(unique_sections[!unique_sections %in% pps_names], collapse = ", ")
+      stop("Section not specified in pulses_per_section but no recyclable value is set: {sections_not_set}")
+    }
+
+    # Names of pulses_per_sections must all exist in unique sections
+    if (!all(is_section_name)) {
+      not_existing_sections <- paste0(pps_names[!is_section_name], collapse = ', ')
+      stop(glue::glue("Section names not found: {not_existing_sections}"))
+    }
+
+    return(pulses_per_section)
+  }
+
+  # Only one recyclable value should be set
+  if (n_empty > 1)
+    stop(glue::glue("pulses_per_section has {n_empty} unnamed values, must provide only 1 to recycle"))
+
+  # Overwrite the temp recycle value to the user-set one, if one was provided
+  if (n_empty == 1)
+    recycled_pulse_value <- pulses_per_section[is_unnamed_value]
+
+  # Temporarily set all sections to the recycled value
+  section_pulses <- rep(recycled_pulse_value, length(unique_sections))
+  names(section_pulses) <- unique_sections
+
+  # Now set the user-specified pulse numbers to each section
+  for (pps_name in pps_names[!is_unnamed_value]) {
+    section_pulses[pps_name] <- pulses_per_section[pps_name]
+  }
+
+  section_pulses
+}
+
+.guess_interval_indices <- function(section_column) {
+  indices <- section_column[NA]
+  interval_idx <- 1L
+  i <- 1L
+
+  previous_section <- section_column[1L]
+
+  while (i <= length(section_column)) {
+    current_section <- section_column[i]
+
+    if (current_section != previous_section) {
+      interval_idx <- interval_idx + 1L
+      previous_section <- current_section
+  }
+
+    indices[i] <- interval_idx
+  i <- i + 1L
+  }
+
+  indices
+}
+
+.compute_offsets <- function(pulses_per_section, section_column, interval_indices) {
+  unique_indices <- unique(interval_indices)
+  n_sections <- length(unique_indices)
+
+  # Allocate a vector mapping the indices to the section labels
+  section_mapping <- rep(NA_character_, n_sections)
+
+  # Given |interval_indices| = K, where interval_indices contains k unique
+  # values s.t. |k| <= K and |k| = n_sections. Assign each value k to its
+  # corresponding section given in section_column
+
+  section_idx <- 1L
+  previous_interval <- interval_indices[1L]
+  section_mapping[1L] <- section_column[1L]
+  for (i in seq_along(interval_indices)) {
+    current_interval <- interval_indices[i]
+
+    if (current_interval != previous_interval) {
+      section_idx <- section_idx + 1L
+      section_mapping[section_idx] <- section_column[i]
+      previous_interval <- current_interval
+
+    }
+
+  }
+
+  n_pulses <- rep(0, n_sections)
+  for (i in seq_along(section_mapping)) {
+    n_pulses[i] <- pulses_per_section[section_mapping[i]]
+  }
+
+  offsets <- c(0, cumsum(n_pulses)[-n_sections])
+  names(offsets) <- unique_indices
+
+  offsets
 }

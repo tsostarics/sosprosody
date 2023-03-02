@@ -2,12 +2,12 @@
 % Please edit documentation in R/print_TextGrid.R
 \name{format.TextGrid}
 \alias{format.TextGrid}
-\title{Format console pitchtier plot}
+\title{Format console TextGrid plot}
 \usage{
 \method{format}{TextGrid}(x, ..., .horiz_res = 80L, .vert_res = 5L)
 }
 \arguments{
-\item{x}{PitchTier object}
+\item{x}{TextGrid object}
 
 \item{...}{Not used}
 
@@ -20,7 +20,7 @@ print. Will be coerced to an even number if given an odd number & coerced
 to 4 if given too small a value}
 }
 \value{
-Returns formatted string to pass to \code{print.PitchTier}
+Returns formatted string to pass to \code{print.TextGrid}
 }
 \description{
 Formats a textgrid object to print a tiered representation to the console.

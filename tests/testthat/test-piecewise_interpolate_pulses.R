@@ -46,3 +46,57 @@ test_that("piecewise interpolation works", {
   # plot(tstdf$tsttp, tstdf$tsthz); points(int_df$tsttp, int_df$tsthz, col='red')
 
 })
+
+test_that("piecewise interpolation with provided indices works", {
+  tstdf <- data.frame(tstfile = "f",
+                      tstsec = c(rep("later",5),rep("earlier",5)),
+                      tsthz = c(seq(10,50,10),
+                                c(10,20,30,20,10)),
+                      tsttp = c(6:10,
+                                1:5),
+                      tstint = c(2,2,2,3,3,1,1,1,1,1))
+  int_df <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 index_column = 'tstint',
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile')
+
+  expect_equal(c(20, 60), as.vector(xtabs(~tstsec, data = int_df)))
+  expect_equal(nrow(int_df), 80)
+})
+
+
+test_that("guessed indices match provided indices", {
+  tstdf <- data.frame(tstfile = "f",
+                      tstsec = c(rep("later",5),rep("earlier",5)),
+                      tsthz = c(seq(10,50,10),
+                                c(10,20,30,20,10)),
+                      tsttp = c(6:10,
+                                1:5),
+                      tstint = rep(c(2,1), each = 5))
+  int_df <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 index_column = 'tstint',
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile')
+
+  int_df2 <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile')
+
+  expect_equal(int_df[,1:5], int_df2)
+})
+

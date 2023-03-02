@@ -8,6 +8,7 @@ piecewise_interpolate_pulses(
   pitchtier_df,
   section_by = "is_nuclear",
   pulses_per_section,
+  index_column,
   time_by = "timepoint_norm",
   .grouping = "file",
   .pitchval = "hz",
