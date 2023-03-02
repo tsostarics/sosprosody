@@ -70,7 +70,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
     pitchtier_df |>
     .group_by_vec(.grouping)
 
-  # Ensure timepoints are ordered (if not sorted the pulse indices may be wrong)
+  # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
     pitchtier_df <-
     pitchtier_df |>
@@ -79,21 +79,11 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   # Get unique indices for each interval, guess if not provided
   if (is.null(index_column)) {
-
+    as.integer(factor())
     pitchtier_df <- pitchtier_df |>
-      dplyr::mutate(sosprosody_interval_i  = .guess_interval_indices(.data[[section_by]]))
-
-    # interval_indices <- .guess_interval_indices(pitchtier_df[[section_by]])
+      dplyr::mutate(sosprosody_interval_i  = guess_interval_indices(.data[[section_by]]))
     index_column <- 'sosprosody_interval_i'
-    # pitchtier_df[[index_column]] <- interval_indices
     DROP_INDEX <- TRUE
-  } else {
-    stopifnot(is.character(index_column) & (length(index_column) == 1))
-
-    stopifnot(index_column %in% pitchtier_df_cols)
-    interval_indices <- pitchtier_df[[index_column]]
-
-    stopifnot(is.numeric(interval_indices))
   }
 
   # Use unique intervals and section names to set appropriate # of pulses
@@ -111,33 +101,32 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
     dplyr::group_split() |>
     purrr::map_dfr(\(file_df) {
 
-      offsets <- .compute_offsets(pulses_per_section,
-                                  file_df[[section_by]],
-                                  file_df[[index_column]])
-
-      file_df |>
+      interpolated_df <-
+        file_df |>
         .group_by_vec(index_column) |>
         dplyr::group_split() |>
         map_method( \(section_df) {
-          section_df <- .group_by_vec(section_df, full_groupings)
+          section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
           interval_idx <- section_df[[index_column]][1L]
-          section_label <- section_df[[section_by]][1]
+          section_label <- section_df[[section_by]][1L]
           section_n_pulses <- pulses_per_section[as.character(section_label)]
-          offset <- offsets[as.character(interval_idx)]
 
           int_df <- interpolate_equal_pulses(section_df,
-                                             n_pulses = section_n_pulses,
-                                             time_by = time_by,
+                                             n_pulses  = section_n_pulses,
+                                             time_by   = time_by,
                                              .pitchval = .pitchval,
-                                             .grouping = .grouping) |>
-            dplyr::mutate(pulse_i = seq_len(section_n_pulses) + offset,
-                          !!sym(section_by) := section_label)
+                                             .grouping = .grouping)
+
+          int_df[[section_by]] <- section_label
 
           if (!DROP_INDEX)
             int_df[[index_column]] <- interval_idx
 
           int_df
         })
+
+      interpolated_df[['pulse_i']] <- seq_len(nrow(interpolated_df))
+      interpolated_df
     })
 }
 
@@ -195,7 +184,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 }
 
 .guess_interval_indices <- function(section_column) {
-  indices <- section_column[NA]
+  indices <- seq_along(section_column)
   interval_idx <- 1L
   i <- 1L
 
