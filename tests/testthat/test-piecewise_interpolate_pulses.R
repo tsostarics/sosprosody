@@ -97,7 +97,7 @@ test_that("guessed indices match provided indices", {
                                  .pitchval = 'tsthz',
                                  .grouping = 'tstfile')
 
-  expect_equal(int_df[,1:5], int_df2)
+  expect_equal(int_df[,c(1:4,6)], int_df2)
 })
 
 test_that("multiple files works", {
@@ -147,17 +147,7 @@ test_that("multiple files works", {
                  44.483, 45.862, 47.241, 48.621, 50)
   answer_hz <- c(answer_hz, answer_hz)
 
-  answer_pulse_i <-
-    c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-      21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-      21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50)
+  answer_pulse_i <- rep(1:50, times = 2)
 
 
   expect_equal(round(int_df$tsttp, 3), answer_tp)

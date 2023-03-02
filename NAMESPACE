@@ -2,6 +2,11 @@
 
 S3method(format,PitchTier)
 S3method(format,TextGrid)
+S3method(guess_interval_indices,character)
+S3method(guess_interval_indices,default)
+S3method(guess_interval_indices,integer)
+S3method(guess_interval_indices,logical)
+S3method(guess_interval_indices,numeric)
 S3method(print,PitchTier)
 S3method(print,TextGrid)
 export(add_erb)

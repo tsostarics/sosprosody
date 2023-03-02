@@ -10,6 +10,39 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// guess_interval_indices_string
+IntegerVector guess_interval_indices_string(const CharacterVector& section_column);
+RcppExport SEXP _sosprosody_guess_interval_indices_string(SEXP section_columnSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type section_column(section_columnSEXP);
+    rcpp_result_gen = Rcpp::wrap(guess_interval_indices_string(section_column));
+    return rcpp_result_gen;
+END_RCPP
+}
+// guess_interval_indices_double
+IntegerVector guess_interval_indices_double(const NumericVector& section_column);
+RcppExport SEXP _sosprosody_guess_interval_indices_double(SEXP section_columnSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type section_column(section_columnSEXP);
+    rcpp_result_gen = Rcpp::wrap(guess_interval_indices_double(section_column));
+    return rcpp_result_gen;
+END_RCPP
+}
+// guess_interval_indices_integer
+IntegerVector guess_interval_indices_integer(IntegerVector section_column);
+RcppExport SEXP _sosprosody_guess_interval_indices_integer(SEXP section_columnSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type section_column(section_columnSEXP);
+    rcpp_result_gen = Rcpp::wrap(guess_interval_indices_integer(section_column));
+    return rcpp_result_gen;
+END_RCPP
+}
 // interpolate_pitchpoints
 NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old_times, NumericVector pitch_vals);
 RcppExport SEXP _sosprosody_interpolate_pitchpoints(SEXP new_timesSEXP, SEXP old_timesSEXP, SEXP pitch_valsSEXP) {
@@ -25,6 +58,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_sosprosody_guess_interval_indices_string", (DL_FUNC) &_sosprosody_guess_interval_indices_string, 1},
+    {"_sosprosody_guess_interval_indices_double", (DL_FUNC) &_sosprosody_guess_interval_indices_double, 1},
+    {"_sosprosody_guess_interval_indices_integer", (DL_FUNC) &_sosprosody_guess_interval_indices_integer, 1},
     {"_sosprosody_interpolate_pitchpoints", (DL_FUNC) &_sosprosody_interpolate_pitchpoints, 3},
     {NULL, NULL, 0}
 };
