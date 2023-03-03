@@ -67,7 +67,7 @@
 #'
 #' @return Dataframe of interpolated pitch pulses by section
 #' @export
-piecewise_interpolate_pulses2 <- function(pitchtier_df,
+piecewise_interpolate_pulses <- function(pitchtier_df,
                                          section_by = "is_nuclear",
                                          pulses_per_section,
                                          index_column = NULL,
@@ -76,130 +76,102 @@ piecewise_interpolate_pulses2 <- function(pitchtier_df,
                                          .pitchval = 'hz',
                                          .sort = TRUE,
                                          parallelize = FALSE) {
+  # `%:=%` <- data.table::`:=`
+  requireNamespace('data.table',quietly = TRUE)
   DROP_INDEX <- FALSE
   pitchtier_df_cols <- colnames(pitchtier_df)
   stopifnot(section_by %in% pitchtier_df_cols)
   stopifnot(time_by %in% pitchtier_df_cols)
   full_groupings <- .get_groupings(pitchtier_df, .grouping)
 
-  pitchtier_df <-
-    pitchtier_df |>
-    .group_by_vec(.grouping)
+  data.table::setDT(pitchtier_df)
 
   # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
-    pitchtier_df <-
-    pitchtier_df |>
-    dplyr::arrange(.data[[section_by]], .by_group = TRUE) |>
-    dplyr::arrange(.data[[time_by]], .by_group = TRUE)
-
+    data.table::setorderv(pitchtier_df, c(section_by, time_by, .grouping))
 
   # Get unique indices for each interval, guess if not provided
   if (is.null(index_column)) {
-    pitchtier_df <- pitchtier_df |>
-      dplyr::mutate(sosprosody_interval_i  = guess_interval_indices(.data[[section_by]]))
+    pitchtier_df[,
+                 'sosprosody_interval_i' := guess_interval_indices(get(section_by)),
+                 by = get(.grouping)]
     index_column <- 'sosprosody_interval_i'
     DROP_INDEX <- TRUE
   }
 
   # Use unique intervals and section names to set appropriate # of pulses
-  unique_sections <- as.character(unique(pitchtier_df[[section_by]]))
+  unique_sections <- as.character(unique(pitchtier_df[, get(section_by)]))
   pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
 
 
-  map_method <- purrr::map_dfr
-  if (parallelize) {
-    future::plan("multisession")
-    map_method <- furrr::future_map_dfr
-  }
+  # map_method <- purrr::map_dfr
+  # if (parallelize) {
+  #   future::plan("multisession")
+  #   map_method <- furrr::future_map_dfr
+  # }
 
-  pitchtier_df |>
-    dplyr::group_split() |>
-    purrr::map_dfr(\(file_df) {
+  pt_df_list <-
+    split(pitchtier_df, f = pitchtier_df[, get(.grouping)])
 
-      interpolated_df <-
-        file_df |>
-        .group_by_vec(index_column) |>
-        dplyr::group_split() |>
-        map_method( \(section_df) {
-          if (nrow(section_df) == 1L)
-            stop(
-"Section only has one value, likely due to too much overlap after sorting.\nThis can also be caused by grouping by the index column but not providing it directly.\nRecommended to provide index_column to fix. Quitting to avoid R crash.")
-          section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
-          interval_idx <- section_df[[index_column]][1L]
-          section_label <- section_df[[section_by]][1L]
-          section_n_pulses <- pulses_per_section[as.character(section_label)]
 
-          int_df <- interpolate_equal_pulses(section_df,
-                                             n_pulses  = section_n_pulses,
-                                             time_by   = time_by,
-                                             .pitchval = .pitchval,
-                                             .grouping = .grouping)
 
-          int_df[[section_by]] <- section_label
+  interpolated_df <-
+    data.table::rbindlist(
+      lapply(pt_df_list,
+           \(file_df) {
+      section_list <- split(file_df, by = index_column)
 
-          if (!DROP_INDEX)
-            int_df[[index_column]] <- interval_idx
+      # Interpolate each section and row-bind the results
+      file_int_df_list <- lapply(section_list,
+                            \(section_df)
+                            .interpolate_section(section_df,
+                                                 pulses_per_section = pulses_per_section,
+                                                 index_column = index_column,
+                                                 section_by = section_by,
+                                                 time_by = time_by,
+                                                 full_groupings = full_groupings,
+                                                 .pitchval = .pitchval,
+                                                 .grouping = .grouping,
+                                                 DROP_INDEX = DROP_INDEX))
+      file_int_df <- data.table::rbindlist(file_int_df_list)
 
-          int_df
-        })
+      # Add pulse_i column
+      file_int_df[, 'pulse_i' := seq_len(.N)]
 
-      interpolated_df[['pulse_i']] <- seq_len(nrow(interpolated_df))
-      interpolated_df
+      file_int_df
     })
+    )
+
+  .group_by_vec(interpolated_df, full_groupings)
 }
 
-.fill_pps <- function(pulses_per_section, unique_sections) {
-  # Temp value to recycle later
-  recycled_pulse_value <- 10
+.interpolate_section <- function(section_df,
+                                 pulses_per_section,
+                                 index_column,
+                                 section_by,
+                                 time_by,
+                                 full_groupings,
+                                 .pitchval,
+                                 .grouping,
+                                 DROP_INDEX) {
+  if (nrow(section_df) == 1L)
+    stop(
+      "Section only has one value, likely due to too much overlap after sorting.\nThis can also be caused by grouping by the index column but not providing it directly.\nRecommended to provide index_column to fix. Quitting to avoid R crash.")
+  section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
+  interval_idx <- section_df[[index_column]][1L]
+  section_label <- section_df[[section_by]][1L]
+  section_n_pulses <- pulses_per_section[as.character(section_label)]
 
-  # Get the names from pulses_per_section and get the number of unnamed elements
-  pps_names <- names(pulses_per_section)
-  is_unnamed_value <- pps_names == ""
-  if (identical(is_unnamed_value, logical(0)))
-    is_unnamed_value <- TRUE
-  n_empty <- sum(is_unnamed_value)
+  int_df <- interpolate_equal_pulses(section_df,
+                                     n_pulses  = section_n_pulses,
+                                     time_by   = time_by,
+                                     .pitchval = .pitchval,
+                                     .grouping = .grouping)
 
-  is_section_name <- pps_names[!is_unnamed_value] %in% unique_sections
+  int_df[[section_by]] <- section_label
 
-  # If no recyclable value is set
-  if (n_empty == 0) {
+  if (!DROP_INDEX)
+    int_df[[index_column]] <- interval_idx
 
-    # If there are some names set
-    if (!is.null(pps_names)) {
-      # # of sections in pulses_per_sections must equal # of unique sections
-      if (!is.null(pps_names) & length(pps_names)  != length(unique_sections)) {
-        sections_not_set <- paste0(unique_sections[!unique_sections %in% pps_names], collapse = ", ")
-        stop(glue::glue("Section not specified in pulses_per_section but no recyclable value is set: {sections_not_set}"))
-      }
-
-      # Names of pulses_per_sections must all exist in unique sections
-      if (!all(is_section_name)) {
-        not_existing_sections <- paste0(pps_names[!is_section_name], collapse = ', ')
-        stop(glue::glue("Section names not found: {not_existing_sections}"))
-      }
-
-      return(pulses_per_section)
-    }
-
-  }
-
-  # Only one recyclable value should be set
-  if (n_empty > 1)
-    stop(glue::glue("pulses_per_section has {n_empty} unnamed values, must provide only 1 to recycle"))
-
-  # Overwrite the temp recycle value to the user-set one, if one was provided
-  if (n_empty == 1)
-    recycled_pulse_value <- pulses_per_section[is_unnamed_value]
-
-  # Temporarily set all sections to the recycled value
-  section_pulses <- rep(recycled_pulse_value, length(unique_sections))
-  names(section_pulses) <- unique_sections
-
-  # Now set the user-specified pulse numbers to each section
-  for (pps_name in pps_names[!is_unnamed_value]) {
-    section_pulses[pps_name] <- pulses_per_section[pps_name]
-  }
-
-  section_pulses
+  int_df
 }
