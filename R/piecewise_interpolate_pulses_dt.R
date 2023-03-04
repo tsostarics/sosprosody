@@ -76,7 +76,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                          .pitchval = 'hz',
                                          .sort = TRUE,
                                          parallelize = FALSE) {
-  # `%:=%` <- data.table::`:=`
   requireNamespace('data.table',quietly = TRUE)
   DROP_INDEX <- FALSE
   pitchtier_df_cols <- colnames(pitchtier_df)
@@ -84,13 +83,14 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   stopifnot(time_by %in% pitchtier_df_cols)
   full_groupings <- .get_groupings(pitchtier_df, .grouping)
 
+  # Change pitchtier_df to data.table so calculations run faster
   data.table::setDT(pitchtier_df)
 
   # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
     data.table::setorderv(pitchtier_df, c(section_by, time_by, .grouping))
 
-  # Get unique indices for each interval, guess if not provided
+  # Guess unique interval indices if index_column is not provided
   if (is.null(index_column)) {
     pitchtier_df[,
                  'sosprosody_interval_i' := guess_interval_indices(get(section_by)),
@@ -103,46 +103,68 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   unique_sections <- as.character(unique(pitchtier_df[, get(section_by)]))
   pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
 
+  # If this should be run in parallel, use future_map
+  map_method <- lapply
+  if (parallelize)
+    map_method <- furrr::future_map
 
-  # map_method <- purrr::map_dfr
-  # if (parallelize) {
-  #   future::plan("multisession")
-  #   map_method <- furrr::future_map_dfr
-  # }
-
+  # Split pitchtier_df into list of dataframes by file
   pt_df_list <-
     split(pitchtier_df, f = pitchtier_df[, get(.grouping)])
 
 
-
   interpolated_df <-
     data.table::rbindlist(
-      lapply(pt_df_list,
-           \(file_df) {
-      section_list <- split(file_df, by = index_column)
+      map_method(
+        pt_df_list,
+        \(file_df) {
+          .interpolate_file(file_df,
+                            pulses_per_section = pulses_per_section,
+                            index_column = index_column,
+                            section_by = section_by,
+                            time_by = time_by,
+                            full_groupings = full_groupings,
+                            .pitchval = .pitchval,
+                            .grouping = .grouping,
+                            DROP_INDEX = DROP_INDEX)
 
-      # Interpolate each section and row-bind the results
-      file_int_df_list <- lapply(section_list,
-                            \(section_df)
-                            .interpolate_section(section_df,
-                                                 pulses_per_section = pulses_per_section,
-                                                 index_column = index_column,
-                                                 section_by = section_by,
-                                                 time_by = time_by,
-                                                 full_groupings = full_groupings,
-                                                 .pitchval = .pitchval,
-                                                 .grouping = .grouping,
-                                                 DROP_INDEX = DROP_INDEX))
-      file_int_df <- data.table::rbindlist(file_int_df_list)
-
-      # Add pulse_i column
-      file_int_df[, 'pulse_i' := seq_len(.N)]
-
-      file_int_df
-    })
+        })
     )
 
   .group_by_vec(interpolated_df, full_groupings)
+}
+
+.interpolate_file <- function(file_df,
+                              pulses_per_section,
+                              index_column,
+                              section_by,
+                              time_by,
+                              full_groupings,
+                              .pitchval,
+                              .grouping,
+                              DROP_INDEX) {
+  section_list <- split(file_df, by = index_column)
+
+  # Interpolate each section and row-bind the results
+  file_int_df_list <-
+    lapply(section_list,
+           \(section_df)
+           .interpolate_section(section_df,
+                                pulses_per_section = pulses_per_section,
+                                index_column = index_column,
+                                section_by = section_by,
+                                time_by = time_by,
+                                full_groupings = full_groupings,
+                                .pitchval = .pitchval,
+                                .grouping = .grouping,
+                                DROP_INDEX = DROP_INDEX))
+
+  file_int_df <- data.table::rbindlist(file_int_df_list)
+
+  # Add pulse_i column
+  file_int_df[, 'pulse_i' := seq_len(.N)]
+
+  file_int_df
 }
 
 .interpolate_section <- function(section_df,
