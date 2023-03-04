@@ -50,8 +50,7 @@ average_pitchtracks <- function(pitchtier_df,
                                 .pitchval = 'hz',
                                 index_column = NULL,
                                 parallelize = FALSE) {
-  # TODO: if section by is missing, make a dummy column to hold the sections
-  #       and remove it later so it can still be passed to piecewise extract
+
   stopifnot(section_by %in% names(pitchtier_df))
 
   if (length(aggregate_by) != 3)
@@ -72,19 +71,17 @@ average_pitchtracks <- function(pitchtier_df,
                                  index_column = index_column,
                                  .grouping = pulses_by,
                                  .pitchval = .pitchval,
-                                 parallelize = parallelize) |>
-    .group_by_vec(c(aggregate_within, "pulse_i", section_by))
+                                 parallelize = parallelize)
 
+  groupings <- c(aggregate_within, "pulse_i", section_by)
+
+  data.table::setDT(equal_pulse_df)
   avg_colname <- paste0("avg_", .pitchval)
 
-  # At each pulse, get the average Hz value and set the time value for the
-  # summary pulse value. Crucially, the spacings between average points
-  # are equal WITHIN THE SECTION
-  suppressMessages(
-    dplyr::summarize(
-      equal_pulse_df,
-      !!sym(avg_colname) := mean(.data[[.pitchval]], na.rm = TRUE),
-      !!sym(time_by) := mean(.data[[time_by]])
-    )
-  )
+  averaged_df <-
+    equal_pulse_df[, setNames(list(mean(tsthz), mean(tsttp)), c(avg_colname, time_by)),
+                 by = groupings]
+
+  .group_by_vec(averaged_df, groupings)
+
 }

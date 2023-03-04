@@ -19,6 +19,7 @@ test_that("averaging two files with two sections works (ie a simple case)",{
                                 aggregate_by =  tstfile ~ tstidx,
                                 .pitchval = 'tsthz')
 
+
   answer_hz <- c(75, 650/9, 625/9, 200/3, 575/9,
                  550/9, 175/3, 500/9, 475/9, 50,
                  30, 30, 30, 30, 30, 30, 30)
