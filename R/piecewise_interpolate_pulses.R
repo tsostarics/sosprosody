@@ -197,3 +197,59 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   int_df
 }
+
+
+.fill_pps <- function(pulses_per_section, unique_sections) {
+  # Temp value to recycle later
+  recycled_pulse_value <- 10
+
+  # Get the names from pulses_per_section and get the number of unnamed elements
+  pps_names <- names(pulses_per_section)
+  is_unnamed_value <- pps_names == ""
+  if (identical(is_unnamed_value, logical(0)))
+    is_unnamed_value <- TRUE
+  n_empty <- sum(is_unnamed_value)
+
+  is_section_name <- pps_names[!is_unnamed_value] %in% unique_sections
+
+  # If no recyclable value is set
+  if (n_empty == 0) {
+
+    # If there are some names set
+    if (!is.null(pps_names)) {
+      # # of sections in pulses_per_sections must equal # of unique sections
+      if (!is.null(pps_names) & length(pps_names)  != length(unique_sections)) {
+        sections_not_set <- paste0(unique_sections[!unique_sections %in% pps_names], collapse = ", ")
+        stop(glue::glue("Section not specified in pulses_per_section but no recyclable value is set: {sections_not_set}"))
+      }
+
+      # Names of pulses_per_sections must all exist in unique sections
+      if (!all(is_section_name)) {
+        not_existing_sections <- paste0(pps_names[!is_section_name], collapse = ', ')
+        stop(glue::glue("Section names not found: {not_existing_sections}"))
+      }
+
+      return(pulses_per_section)
+    }
+
+  }
+
+  # Only one recyclable value should be set
+  if (n_empty > 1)
+    stop(glue::glue("pulses_per_section has {n_empty} unnamed values, must provide only 1 to recycle"))
+
+  # Overwrite the temp recycle value to the user-set one, if one was provided
+  if (n_empty == 1)
+    recycled_pulse_value <- pulses_per_section[is_unnamed_value]
+
+  # Temporarily set all sections to the recycled value
+  section_pulses <- rep(recycled_pulse_value, length(unique_sections))
+  names(section_pulses) <- unique_sections
+
+  # Now set the user-specified pulse numbers to each section
+  for (pps_name in pps_names[!is_unnamed_value]) {
+    section_pulses[pps_name] <- pulses_per_section[pps_name]
+  }
+
+  section_pulses
+}
