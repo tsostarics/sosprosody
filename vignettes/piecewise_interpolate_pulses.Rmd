@@ -64,7 +64,7 @@ Here's one way to load multiple files from a directory at once.
 This vignette uses two examples
 
 ```{r}
-pitchtier_df <- 
+pitchtiers <- 
   lapply(list.files(path = "./", 
                     pattern = ".PitchTier$",
                     full.names = TRUE),
@@ -74,8 +74,9 @@ pitchtier_df <-
            add_erbs = FALSE,
            add_semitones = FALSE
          )
-       }) |> 
-  do.call(rbind, args = _)
+       }) 
+
+pitchtier_df <- do.call(rbind, pitchtiers)
 
 all_tg_tiers <- 
   lapply(list.files("./",
@@ -92,11 +93,14 @@ And below I'll define a few helper functions that I'll use repeatedly.
 ```{r helpers}
 # Extract a specific tier from the list of tiers for each textgrid file
 pull_tier <- function(tg_tier_list, which_tier) {
-  lapply(tg_tier_list,
+  tiers <- 
+    lapply(tg_tier_list,
          \(tg_list) 
          tg_list[[which_tier]]) |> 
-    unname() |> 
-    do.call(rbind, args = _)
+    unname()
+  
+  
+    do.call(rbind, args = tiers)
 }
 
 # Plot pulses for each file colored by each section
