@@ -1,0 +1,428 @@
+---
+title: "piecewise_interpolate_pulses"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{piecewise_interpolate_pulses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE, 
+  dpi = 300,
+  message = FALSE,
+  # dev = 'pdf',
+  fig.height = 6,
+  fig.width = 8,
+  out.height = "600px",
+  out.width = "800px",
+  fig.align = 'center',
+  comment = "#>"
+)
+```
+
+# Piecewise interpolate pulses examples
+
+In this vignette I'll show some examples of using the `piecewise_interpolate_pulses` function.
+This function is used to upsample or downsample the number of pitch pulses, but does so separately for different sections of the total pitch contour.
+The resulting pitch pulses are always equally spaced within each section, and the different sections may have differing numbers of pulses.
+You can use the output to do things like average pitch contours by the pulse indices.
+
+```{r setup}
+library(sosprosody)
+library(rPraat)
+library(dplyr)
+library(ggplot2)
+```
+
+# Loading files 
+
+Here's the basic workflow for loading a PitchTier object and TextGrid object
+using `sosprosody` and `rPraat`.
+
+```{r load-files}
+pt <- pt.read("simpsons_theyre_not.PitchTier")
+tg <- tg.read("simpsons_theyre_not.TextGrid")
+
+pt
+tg
+```
+
+```{r conv-to-df}
+pitchtier_df <- pitchtier_to_dataframe(pt,
+                                       add_erbs = FALSE, 
+                                       add_semitones = FALSE)
+textgrid_tiers <- 
+  textgrid_to_dataframes(tg.read("simpsons_theyre_not.TextGrid"))
+```
+
+## Bulk loading
+
+Here's one way to load multiple files from a directory at once.
+This vignette uses two examples
+
+```{r}
+pitchtiers <- 
+  lapply(list.files(path = "./", 
+                    pattern = ".PitchTier$",
+                    full.names = TRUE),
+       \(pt_path) {
+         pitchtier_to_dataframe(
+           pt.read(pt_path),
+           add_erbs = FALSE,
+           add_semitones = FALSE
+         )
+       }) 
+
+pitchtier_df <- do.call(rbind, pitchtiers)
+
+all_tg_tiers <- 
+  lapply(list.files("./",
+                    pattern = ".TextGrid$",
+                    full.names = TRUE),
+       \(tg_path) {
+         textgrid_to_dataframes(tg.read(tg_path))
+       }) |> 
+  setNames(c("bobsburgers", "simpsons"))
+```
+
+And below I'll define a few helper functions that I'll use repeatedly.
+
+```{r helpers}
+# Extract a specific tier from the list of tiers for each textgrid file
+pull_tier <- function(tg_tier_list, which_tier) {
+  tiers <- 
+    lapply(tg_tier_list,
+         \(tg_list) 
+         tg_list[[which_tier]]) |> 
+    unname()
+  
+  
+    do.call(rbind, args = tiers)
+}
+
+# Plot pulses for each file colored by each section
+plot_pulses <- function(pulse_df) {
+  pulse_df |> 
+  ggplot(aes(x = timepoint, y = hz, fill = label, group = interval_i)) +
+  geom_line() +
+  geom_point(color = 'black', shape = 21, size = 2) +
+  facet_grid(file~.) +
+    theme_bw() +
+    theme(legend.position = "top")
+}
+
+# Label pulses via non-equi join with dplyr
+label_pulses <- function(pitchtier_df, tg_df) {
+  pitchtier_df |> 
+  dplyr::left_join(tg_df,
+                   by = join_by(file, between(timepoint, 
+                                              interval_start, 
+                                              interval_end))) |> 
+    dplyr::filter(!grepl("^\\s*$", label))
+}
+```
+
+
+# Example 1
+
+In this example I have two files: one has 2 speakers and another has 1 speaker.
+I'll first show the raw values from the PitchTier from Praat.
+
+```{r setup-speaker-data}
+speaker_tier_df <- pull_tier(all_tg_tiers, 'speaker')
+
+speaker_labeled_df <- label_pulses(pitchtier_df, speaker_tier_df)
+plot_pulses(speaker_labeled_df)
+```
+
+Next I'll get equally spaced pulses for the speakers.
+I want 40 pulses for speaker(s) A and 5 for speaker B.
+These pulses should be taken separately for each speakerinterval, specified by `label`.
+These intervals are uniquely identified by `interval_i`.
+This should be done separately for each `file`.
+
+```{r speaker-interpolated-pulses}
+speaker_interpolated_pulses <- 
+  piecewise_interpolate_pulses(speaker_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("A" = 40,
+                                                      "B" = 5),
+                               index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+# Compare to the pulses in the previous plot
+plot_pulses(speaker_interpolated_pulses)
+```
+
+# Example 2
+
+Next I'll be using the same two files, but this time I'll be extracting pulses
+depending on the `section` they appear in.
+This tier is annotated roughly at the intonational phrase level, separating
+*prenuclear* and *nuclear* regions.
+Disfluencies are annotated separately as *disf*.
+
+```{r setup-section-data}
+section_tier_df <- pull_tier(all_tg_tiers, 'section')
+
+section_labeled_df <- label_pulses(pitchtier_df, section_tier_df)
+
+plot_pulses(section_labeled_df)
+```
+
+Next we'll extract 10 pulses for each nuclear region, 20 for each prenuclear
+region, and 5 for the disfluencies.
+
+```{r section-interpolated-pulses}
+section_interpolated_pulses <- 
+  piecewise_interpolate_pulses(section_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("nuclear" = 10,
+                                                      "prenuclear" = 20,
+                                                      "disfl" = 5),
+                               index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+plot_pulses(section_interpolated_pulses)
+```
+
+
+# Example 3
+
+Next we'll again use the same two audio files but extract pulses at the word level.
+
+```{r setup-word-data}
+word_tier_df <- pull_tier(all_tg_tiers, 'word')
+
+word_labeled_df <- label_pulses(pitchtier_df, word_tier_df)
+
+plot_pulses(word_labeled_df) 
+```
+
+This time, there's way too many words to specify in `pulses_per_section`, so we'll extract specific numbers for a few words we're interested in and then just 5 for everything else
+
+```{r word-interpolated-pulses}
+word_interpolated_pulses <- 
+  piecewise_interpolate_pulses(word_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("proud" = 50,
+                                                      "not" = 50,
+                                                      "pentameter" = 20,
+                                                      5),
+                               index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+plot_pulses(word_interpolated_pulses)
+```
+
+# Example 3
+
+This time the intervals are again at the word label, but annotated by roughly their grammatical class.
+
+```{r setup-word2-data}
+word2_tier_df <- pull_tier(all_tg_tiers, 'word2')
+
+word2_labeled_df <- label_pulses(pitchtier_df, word2_tier_df)
+
+plot_pulses(word2_labeled_df) 
+```
+
+Below, we might only be interested in content words (is closed class items like nouns, adjectives, verbs).
+Again this is a good chance to use a single value that gets recycled so we don't have to specify each individual label in `pulses_per_section`.
+
+```{r word2-interpolated-pulses}
+word2_interpolated_pulses <- 
+  piecewise_interpolate_pulses(word2_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("content" = 30,
+                                                      5),
+                               index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+plot_pulses(word2_interpolated_pulses)
+```
+
+
+# Example 4
+
+Next we again use the word level, but here the words are annotated only for whether they're actually words or a disfluency.
+For this example, it's *especially* important that `index_column` is provided because there are many adjacent intervals labeled "word".
+When `index_column` isn't provided, `piecewise_interpolate_functions` tries to guess the unique interval indices based on where the interval labels specified in `section_by` change.
+For example, *word disf word word disf* would correspond to unique indices of *1 2 3 3 4*, where the two *word* intervals in the middle are treated as a single "large" interval.
+If we provided `index_column` directly, we would know that the unique indices are actually *1 2 3 4 5*.
+
+Notice that when we plot the interval pulses, we can see that there are separated sections of pulses.
+
+```{r setup-word3-data}
+word3_tier_df <- pull_tier(all_tg_tiers, 'word3')
+
+word3_labeled_df <- label_pulses(pitchtier_df, word3_tier_df)
+
+plot_pulses(word3_labeled_df)
+```
+
+Here's what happens when we *do* provide `index_column`:
+
+```{r word3-interpolated-pulses}
+word3_interpolated_pulses <- 
+  piecewise_interpolate_pulses(word3_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("word" = 10,
+                                                      5),
+                               index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+plot_pulses(word3_interpolated_pulses)
+```
+
+And here's what happens when we *don't* and we allow the function to guess for us:
+
+```{r}
+word3_interpolated_pulses2 <- 
+  piecewise_interpolate_pulses(word3_labeled_df,
+                               section_by = "label",
+                               pulses_per_section = c("word" = 10,
+                                                      5),
+                               # index_column = "interval_i",
+                               time_by = "timepoint",
+                               .grouping = "file")
+
+word3_interpolated_pulses2 |> 
+ggplot(aes(x = timepoint, y = hz, fill = label)) +
+  geom_line() +
+  geom_point(color = 'black', shape = 21, size = 2) +
+  facet_grid(file~.) +
+    theme_bw() +
+    theme(legend.position = "top")
+```
+
+We can see that we still get 10 pulses for "each word" and 5 pulses for "each disfluency", but because there are so many adjacent intervals with the same label, we get much fewer pulses in the end.
+
+# Example 5
+
+Here's a constructed example where the different sections have *overlapping pulses*.
+This arises when a pitch pulse occurs exactly where a TextGrid boundary is placed.
+This is particularly common when working with force aligners like the Montreal Force Aligner, as the resolution of the boundaries is 10ms (which is often the same rate at which pitch is sampled).
+
+Below is a schematic pitch contour with some overlapping pulses
+
+```{r}
+overlapping_df <- 
+  data.frame(file = 'file1',
+             section = c(rep('a', times = 2),
+                         rep('b', times = 2),
+                         rep('c', times = 2)),
+             timestamp = c(seq(0,1,length.out = 2),
+                           seq(1, 1.4, length.out = 2),
+                           seq(1.4, 2, length.out = 2)),
+             hz = c(seq(90, 110, length.out = 2),
+                    seq(110, 70, length.out = 2),
+                    seq(70, 60, length.out = 2)))
+overlap_plot <- 
+  overlapping_df |> 
+  ggplot(aes(x = timestamp, y = hz, color = section, shape = section)) +
+  geom_line() +
+  geom_point(size = 3, aes(shape = section, fill = section),color ='black') +
+  scale_shape_manual(values = c(21, 22, 24)) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = 'top')
+
+overlap_plot
+```
+
+Separating them out into separate facets, we can see that the different sections *do indeed* have two endpoints each.
+
+```{r}
+overlap_plot + 
+  facet_grid(~section) + 
+  theme(legend.position = 'none')
+```
+
+Here's what happens if we extract equal pulses and then plot by the pulse indices.
+When there's a pulse directly on a boundary, we end up getting sections where adjacent pulses have the same Hz value (below, for example, pulses 15 and 16 and 31 and 32).
+This makes it seem like there are parts of the pitch contour that don't change at all for a very brief moment in time, which is not representative of the actual signal.
+
+```{r}
+overlap_pulses <- 
+  overlapping_df |> 
+  piecewise_interpolate_pulses(section_by = 'section',
+                               pulses_per_section = 15,
+                               time_by = 'timestamp',
+                               .grouping = 'file')
+
+overlap_pulses |> 
+  ggplot(aes(x = pulse_i, y = hz)) +
+  annotate(xmin = 14.5,
+           xmax = 16.5,
+           ymin = 108,
+           ymax = 112,
+           geom = 'rect',
+           fill = 'red',
+           alpha = .4) +
+  annotate(xmin = 29.5,
+           xmax = 31.5,
+           ymin = 68,
+           ymax = 72,
+           geom = 'rect',
+           fill = 'red',
+           alpha = .4) +
+  geom_line() +
+  geom_point(size = 3, aes(shape = section, fill = section)) +
+  scale_shape_manual(values = c(21, 22, 24)) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = 'top') +
+  coord_fixed(1/2)
+```
+
+So, I've provided a function `drop_overlapping_pulses` that will detect these sections where the Hz value doesn't change and only keep either the left or the right pulse. 
+
+```{r}
+adjusted_df_l <- 
+  overlap_pulses |> 
+  drop_overlapping_pulses(keep = 'left',
+                          time_by = 'timestamp',
+                          pulse_col = 'pulse_i',
+                          .grouping = 'file')
+
+adjusted_df_r <- 
+  overlap_pulses |> 
+  drop_overlapping_pulses(keep = 'right',
+                          time_by = 'timestamp',
+                          pulse_col = 'pulse_i',
+                          .grouping = 'file')
+
+
+keep_left_plot <- 
+  adjusted_df_l |> 
+  ggplot(aes(x = pulse_i, y = hz)) +
+  geom_line() +
+  geom_point(size = 3, aes(shape = section, fill = section)) +
+  scale_shape_manual(values = c(21, 22, 24)) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = 'top') +
+  coord_fixed(1/2)
+
+keep_right_plot <- 
+  adjusted_df_r |> 
+  ggplot(aes(x = pulse_i, y = hz)) +
+  geom_line() +
+  geom_point(size = 3, aes(shape = section, fill = section)) +
+  scale_shape_manual(values = c(21, 22, 24)) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = 'none') +
+  coord_fixed(1/2)
+
+keep_left_plot
+keep_right_plot
+```
+
+It's important to note that because we *first* extracted 15 equally spaced pulses, *then* deleted a few, the resulting sections will have either 15 or 14 pulses (depending on the section).
+To circumvent this, you could consider extracting 1 more pulse for specific sections, then remove it when there's an overlap, resulting in 15 pulses for every section.

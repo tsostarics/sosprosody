@@ -2,12 +2,12 @@
 % Please edit documentation in R/print_TextGrid.R
 \name{print.TextGrid}
 \alias{print.TextGrid}
-\title{Print pitchtier object}
+\title{Print TextGrid object}
 \usage{
 \method{print}{TextGrid}(x, ...)
 }
 \arguments{
-\item{x}{Pitchtier from \code{pt.read}}
+\item{x}{TextGrid from \code{tg.read}}
 
 \item{...}{Unused}
 }
@@ -15,5 +15,5 @@
 invisibly returns \code{x}
 }
 \description{
-See \code{format.PitchTier}
+See \code{format.TextGrid}
 }

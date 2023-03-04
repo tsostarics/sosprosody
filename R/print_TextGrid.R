@@ -1,4 +1,4 @@
-#' Format console pitchtier plot
+#' Format console TextGrid plot
 #'
 #' Formats a textgrid object to print a tiered representation to the console.
 #' Filename is shown at the top, with tiers printed in descending order as they
@@ -9,7 +9,7 @@
 #' Summary information about the number of labeled annotations out of the total
 #' number of annotations on the tier is provided, along with the total duration.
 #'
-#' @param x PitchTier object
+#' @param x TextGrid object
 #' @param .horiz_res Horizontal resolution, integer number of characters
 #' wide to print. Default is 80, recommended to be at least 50. Coerced to be 2
 #' if given a value less than 2, although 2 isn't particularly useful
@@ -18,7 +18,7 @@
 #' to 4 if given too small a value
 #' @param ... Not used
 #'
-#' @return Returns formatted string to pass to `print.PitchTier`
+#' @return Returns formatted string to pass to `print.TextGrid`
 #' @export
 format.TextGrid <- function(x, ..., .horiz_res = 80L, .vert_res = 5L) {
   if (.horiz_res < 2)
@@ -87,11 +87,11 @@ format.TextGrid <- function(x, ..., .horiz_res = 80L, .vert_res = 5L) {
   paste0(paste0(c(filename, formatted_strings), collapse = "\n"),chopped_notice)
 }
 
-#' Print pitchtier object
+#' Print TextGrid object
 #'
-#' See `format.PitchTier`
+#' See `format.TextGrid`
 #'
-#' @param x Pitchtier from `pt.read`
+#' @param x TextGrid from `tg.read`
 #' @param ... Unused
 #'
 #' @return invisibly returns `x`

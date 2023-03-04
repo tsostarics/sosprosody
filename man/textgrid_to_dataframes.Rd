@@ -4,10 +4,13 @@
 \alias{textgrid_to_dataframes}
 \title{Convert textgrid object to list of dataframes}
 \usage{
-textgrid_to_dataframes(textgrid)
+textgrid_to_dataframes(textgrid, .remove_filename = TRUE)
 }
 \arguments{
 \item{textgrid}{TextGrid object from \code{tg.read}}
+
+\item{.remove_filename}{Logical, whether to remove the \code{.TextGrid} part from
+the file name}
 }
 \value{
 List of dataframes for each tier

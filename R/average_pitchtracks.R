@@ -34,6 +34,7 @@
 #' over. Defaults to `"hz"`
 #' @param parallelize Whether to run in parallel via multisession
 #' `furrr::future_map_dfr`, passed on to `piecewise_interpolate_pulses`
+#' @param index_column See `piecewise_interpolate_pulses`
 #'
 #' @return A dataframe containing the averaged and equally spaced piecewise
 #' pitch contours
@@ -47,9 +48,9 @@ average_pitchtracks <- function(pitchtier_df,
                                 time_by = 'timepoint_norm',
                                 aggregate_by,
                                 .pitchval = 'hz',
+                                index_column = NULL,
                                 parallelize = FALSE) {
-  # TODO: if section by is missing, make a dummy column to hold the sections
-  #       and remove it later so it can still be passed to piecewise extract
+
   stopifnot(section_by %in% names(pitchtier_df))
 
   if (length(aggregate_by) != 3)
@@ -64,24 +65,25 @@ average_pitchtracks <- function(pitchtier_df,
   equal_pulse_df <-
     pitchtier_df |>
     .group_by_vec(c(pulses_by, aggregate_within)) |>
-    piecewise_interpolate_pulses(section_by,
-                                 pulses_per_section,
-                                 time_by,
-                                 pulses_by,
-                                 .pitchval,
-                                 parallelize) |>
-    .group_by_vec(c(aggregate_within, "pulse_i", section_by))
+    piecewise_interpolate_pulses(section_by = section_by,
+                                 pulses_per_section = pulses_per_section,
+                                 time_by = time_by,
+                                 index_column = index_column,
+                                 .grouping = pulses_by,
+                                 .pitchval = .pitchval,
+                                 parallelize = parallelize)
 
+  groupings <- c(aggregate_within, "pulse_i", section_by)
+
+  data.table::setDT(equal_pulse_df)
   avg_colname <- paste0("avg_", .pitchval)
 
-  # At each pulse, get the average Hz value and set the time value for the
-  # summary pulse value. Crucially, the spacings between average points
-  # are equal WITHIN THE SECTION
-  suppressMessages(
-    dplyr::summarize(
-      equal_pulse_df,
-      !!sym(avg_colname) := mean(.data[[.pitchval]], na.rm = TRUE),
-      !!sym(time_by) := mean(.data[[time_by]])
-    )
-  )
+  averaged_df <-
+    equal_pulse_df[, stats::setNames(list(mean(get(.pitchval)),
+                                          mean(get(time_by))),
+                                     c(avg_colname, time_by)),
+                 by = groupings]
+
+  .group_by_vec(averaged_df, groupings)
+
 }
