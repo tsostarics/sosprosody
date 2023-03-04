@@ -83,16 +83,17 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   stopifnot(time_by %in% pitchtier_df_cols)
   full_groupings <- .get_groupings(pitchtier_df, .grouping)
 
+  pitchtier_dt <- data.table::copy(pitchtier_df)
   # Change pitchtier_df to data.table so calculations run faster
-  data.table::setDT(pitchtier_df)
+  data.table::setDT(pitchtier_dt)
 
   # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
-    data.table::setorderv(pitchtier_df, c(section_by, time_by, .grouping))
+    data.table::setorderv(pitchtier_dt, c(section_by, time_by, .grouping))
 
   # Guess unique interval indices if index_column is not provided
   if (is.null(index_column)) {
-    pitchtier_df[,
+    pitchtier_dt[,
                  'sosprosody_interval_i' := guess_interval_indices(get(section_by)),
                  by = get(.grouping)]
     index_column <- 'sosprosody_interval_i'
@@ -100,7 +101,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   }
 
   # Use unique intervals and section names to set appropriate # of pulses
-  unique_sections <- as.character(unique(pitchtier_df[, get(section_by)]))
+  unique_sections <- as.character(unique(pitchtier_dt[, get(section_by)]))
   pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
 
   # If this should be run in parallel, use future_map
@@ -110,7 +111,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   # Split pitchtier_df into list of dataframes by file
   pt_df_list <-
-    split(pitchtier_df, f = pitchtier_df[, get(.grouping)])
+    split(pitchtier_dt, f = pitchtier_dt[, get(.grouping)])
 
 
   interpolated_df <-
