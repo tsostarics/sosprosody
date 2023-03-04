@@ -79,7 +79,9 @@ average_pitchtracks <- function(pitchtier_df,
   avg_colname <- paste0("avg_", .pitchval)
 
   averaged_df <-
-    equal_pulse_df[, setNames(list(mean(tsthz), mean(tsttp)), c(avg_colname, time_by)),
+    equal_pulse_df[, stats::setNames(list(mean(get(.pitchval)),
+                                          mean(get(time_by))),
+                                     c(avg_colname, time_by)),
                  by = groupings]
 
   .group_by_vec(averaged_df, groupings)
