@@ -1,0 +1,274 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 7.064512471655329 
+tiers? <exists> 
+size = 5 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "speaker" 
+        xmin = 0 
+        xmax = 7.064512471655329 
+        intervals: size = 5 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.2740543376362754 
+            text = "" 
+        intervals [2]:
+            xmin = 1.2740543376362754 
+            xmax = 4.563492031508854 
+            text = "A" 
+        intervals [3]:
+            xmin = 4.563492031508854 
+            xmax = 4.890682992178241 
+            text = "" 
+        intervals [4]:
+            xmin = 4.890682992178241 
+            xmax = 5.9189974399963114 
+            text = "B" 
+        intervals [5]:
+            xmin = 5.9189974399963114 
+            xmax = 7.064512471655329 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "section" 
+        xmin = 0 
+        xmax = 7.064512471655329 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.2740543376362754 
+            text = "" 
+        intervals [2]:
+            xmin = 1.2740543376362754 
+            xmax = 4.073267386961948 
+            text = "prenuclear" 
+        intervals [3]:
+            xmin = 4.073267386961948 
+            xmax = 4.563492031508854 
+            text = "nuclear" 
+        intervals [4]:
+            xmin = 4.563492031508854 
+            xmax = 4.890682992178241 
+            text = "" 
+        intervals [5]:
+            xmin = 4.890682992178241 
+            xmax = 5.9189974399963114 
+            text = "nuclear" 
+        intervals [6]:
+            xmin = 5.9189974399963114 
+            xmax = 7.064512471655329 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0 
+        xmax = 7.064512471655329 
+        intervals: size = 16 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.2740543376362754 
+            text = "" 
+        intervals [2]:
+            xmin = 1.2740543376362754 
+            xmax = 1.3876308880888588 
+            text = "" 
+        intervals [3]:
+            xmin = 1.3876308880888588 
+            xmax = 1.4960767752333588 
+            text = "the" 
+        intervals [4]:
+            xmin = 1.4960767752333588 
+            xmax = 2.2179911920135273 
+            text = "pentameter" 
+        intervals [5]:
+            xmin = 2.2179911920135273 
+            xmax = 2.5316537236169947 
+            text = "checks" 
+        intervals [6]:
+            xmin = 2.5316537236169947 
+            xmax = 2.735330692190675 
+            text = "out" 
+        intervals [7]:
+            xmin = 2.735330692190675 
+            xmax = 2.9199978103641446 
+            text = "your" 
+        intervals [8]:
+            xmin = 2.9199978103641446 
+            xmax = 3.368749293781224 
+            text = "parents" 
+        intervals [9]:
+            xmin = 3.368749293781224 
+            xmax = 3.580573341097851 
+            text = "must" 
+        intervals [10]:
+            xmin = 3.580573341097851 
+            xmax = 3.808691545900373 
+            text = "be" 
+        intervals [11]:
+            xmin = 3.808691545900373 
+            xmax = 4.073267386961948 
+            text = "so" 
+        intervals [12]:
+            xmin = 4.073267386961948 
+            xmax = 4.563492031508854 
+            text = "proud" 
+        intervals [13]:
+            xmin = 4.563492031508854 
+            xmax = 4.890682992178241 
+            text = "" 
+        intervals [14]:
+            xmin = 4.890682992178241 
+            xmax = 5.219835030356042 
+            text = "they're" 
+        intervals [15]:
+            xmin = 5.219835030356042 
+            xmax = 5.9189974399963114 
+            text = "not" 
+        intervals [16]:
+            xmin = 5.9189974399963114 
+            xmax = 7.064512471655329 
+            text = "" 
+    item [4]:
+        class = "IntervalTier" 
+        name = "word2" 
+        xmin = 0 
+        xmax = 7.064512471655329 
+        intervals: size = 16 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.2740543376362754 
+            text = "" 
+        intervals [2]:
+            xmin = 1.2740543376362754 
+            xmax = 1.3876308880888588 
+            text = "" 
+        intervals [3]:
+            xmin = 1.3876308880888588 
+            xmax = 1.4960767752333588 
+            text = "det" 
+        intervals [4]:
+            xmin = 1.4960767752333588 
+            xmax = 2.2179911920135273 
+            text = "content" 
+        intervals [5]:
+            xmin = 2.2179911920135273 
+            xmax = 2.5316537236169947 
+            text = "content" 
+        intervals [6]:
+            xmin = 2.5316537236169947 
+            xmax = 2.735330692190675 
+            text = "prep" 
+        intervals [7]:
+            xmin = 2.735330692190675 
+            xmax = 2.9199978103641446 
+            text = "pronoun" 
+        intervals [8]:
+            xmin = 2.9199978103641446 
+            xmax = 3.368749293781224 
+            text = "content" 
+        intervals [9]:
+            xmin = 3.368749293781224 
+            xmax = 3.580573341097851 
+            text = "modal" 
+        intervals [10]:
+            xmin = 3.580573341097851 
+            xmax = 3.808691545900373 
+            text = "cop" 
+        intervals [11]:
+            xmin = 3.808691545900373 
+            xmax = 4.073267386961948 
+            text = "mod" 
+        intervals [12]:
+            xmin = 4.073267386961948 
+            xmax = 4.563492031508854 
+            text = "content" 
+        intervals [13]:
+            xmin = 4.563492031508854 
+            xmax = 4.890682992178241 
+            text = "" 
+        intervals [14]:
+            xmin = 4.890682992178241 
+            xmax = 5.219835030356042 
+            text = "pro-cop" 
+        intervals [15]:
+            xmin = 5.219835030356042 
+            xmax = 5.9189974399963114 
+            text = "neg" 
+        intervals [16]:
+            xmin = 5.9189974399963114 
+            xmax = 7.064512471655329 
+            text = "" 
+    item [5]:
+        class = "IntervalTier" 
+        name = "word3" 
+        xmin = 0 
+        xmax = 7.064512471655329 
+        intervals: size = 16 
+        intervals [1]:
+            xmin = 0 
+            xmax = 1.2740543376362754 
+            text = "" 
+        intervals [2]:
+            xmin = 1.2740543376362754 
+            xmax = 1.3876308880888588 
+            text = "" 
+        intervals [3]:
+            xmin = 1.3876308880888588 
+            xmax = 1.4960767752333588 
+            text = "word" 
+        intervals [4]:
+            xmin = 1.4960767752333588 
+            xmax = 2.2179911920135273 
+            text = "word" 
+        intervals [5]:
+            xmin = 2.2179911920135273 
+            xmax = 2.5316537236169947 
+            text = "word" 
+        intervals [6]:
+            xmin = 2.5316537236169947 
+            xmax = 2.735330692190675 
+            text = "word" 
+        intervals [7]:
+            xmin = 2.735330692190675 
+            xmax = 2.9199978103641446 
+            text = "word" 
+        intervals [8]:
+            xmin = 2.9199978103641446 
+            xmax = 3.368749293781224 
+            text = "word" 
+        intervals [9]:
+            xmin = 3.368749293781224 
+            xmax = 3.580573341097851 
+            text = "word" 
+        intervals [10]:
+            xmin = 3.580573341097851 
+            xmax = 3.808691545900373 
+            text = "word" 
+        intervals [11]:
+            xmin = 3.808691545900373 
+            xmax = 4.073267386961948 
+            text = "word" 
+        intervals [12]:
+            xmin = 4.073267386961948 
+            xmax = 4.563492031508854 
+            text = "word" 
+        intervals [13]:
+            xmin = 4.563492031508854 
+            xmax = 4.890682992178241 
+            text = "" 
+        intervals [14]:
+            xmin = 4.890682992178241 
+            xmax = 5.219835030356042 
+            text = "word" 
+        intervals [15]:
+            xmin = 5.219835030356042 
+            xmax = 5.9189974399963114 
+            text = "word" 
+        intervals [16]:
+            xmin = 5.9189974399963114 
+            xmax = 7.064512471655329 
+            text = "" 
