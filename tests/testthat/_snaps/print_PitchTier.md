@@ -3,7 +3,7 @@
     Code
       print(new_pitchtier())
     Output
-      testpt.PitchTier: 100 total pitch pulses.
+      testpt.PitchTier: 100 total pulses.
       100|                                                                           |
          |                                                                         OO|
          |                                                                      OOO  |
