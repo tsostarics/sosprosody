@@ -152,7 +152,8 @@ speaker_interpolated_pulses <-
                                                       "B" = 5),
                                index_column = "interval_i",
                                time_by = "timepoint",
-                               .grouping = "file")
+                               .grouping = "file",
+                               .sort = F)
 
 # Compare to the pulses in the previous plot
 plot_pulses(speaker_interpolated_pulses)
@@ -186,7 +187,8 @@ section_interpolated_pulses <-
                                                       "disfl" = 5),
                                index_column = "interval_i",
                                time_by = "timepoint",
-                               .grouping = "file")
+                               .grouping = "file",
+                               .sort = F)
 
 plot_pulses(section_interpolated_pulses)
 ```
@@ -216,7 +218,8 @@ word_interpolated_pulses <-
                                                       5),
                                index_column = "interval_i",
                                time_by = "timepoint",
-                               .grouping = "file")
+                               .grouping = "file",
+                               .sort = F)
 
 plot_pulses(word_interpolated_pulses)
 ```
@@ -244,7 +247,8 @@ word2_interpolated_pulses <-
                                                       5),
                                index_column = "interval_i",
                                time_by = "timepoint",
-                               .grouping = "file")
+                               .grouping = "file",
+                               .sort = F)
 
 plot_pulses(word2_interpolated_pulses)
 ```
@@ -278,7 +282,8 @@ word3_interpolated_pulses <-
                                                       5),
                                index_column = "interval_i",
                                time_by = "timepoint",
-                               .grouping = "file")
+                               .grouping = "file",
+                               .sort = F)
 
 plot_pulses(word3_interpolated_pulses)
 ```
@@ -356,7 +361,8 @@ overlap_pulses <-
   piecewise_interpolate_pulses(section_by = 'section',
                                pulses_per_section = 15,
                                time_by = 'timestamp',
-                               .grouping = 'file')
+                               .grouping = 'file',
+                               .sort = F)
 
 overlap_pulses |> 
   ggplot(aes(x = pulse_i, y = hz)) +

@@ -6,13 +6,13 @@
       testpt.PitchTier: 100 total pulses.
       100|                                                                           |
          |                                                                         OO|
-         |                                                                      OOO  |
-         |                    OOO                                           OOOO     |
-         |                 OOO   OOO                                     OOO         |
-         |             OOOO         OOOO                             OOOO            |
-         |         OOOO                 OOO                      OOOO                |
+         |                                                                     OOOO  |
+         |                    OOO                                           OOO      |
+         |                OOOO   OOO                                    OOOO         |
+         |             OOO          OOO                              OOO             |
+         |         OOOO                OOOO                      OOOO                |
          |     OOOO                        OOOO              OOOO                    |
-         |OOOOO                                OOOOO    OOOOO                        |
-       60|                                          OOOO                             |
+         | OOOO                                OOOOO     OOOO                        |
+       60|O                                         OOOOO                            |
          0                                                                         1.6 
 
