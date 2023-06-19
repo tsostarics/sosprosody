@@ -33,7 +33,9 @@ time_normalize <- function(pitchtier_df,
   pitchtier_df <- .group_by_vec(pitchtier_df, full_groupings)
 
   if (.fromzero)
-    pitchtier_df <- dplyr::mutate(pitchtier_df, !!sym(.from) := !!sym(.from) - min(!!sym(.from)))
+    return(dplyr::mutate(pitchtier_df,
+                         !!sym(.to) := !!sym(.from) - min(!!sym(.from)),
+                         !!sym(.to) := !!sym(.to) / max(!!sym(.to))))
 
   pitchtier_df |>
     dplyr::mutate(!!sym(.to) := !!sym(.from) / max(!!sym(.from)))
