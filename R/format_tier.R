@@ -29,8 +29,8 @@
   n_pulses <- last_frame - first_frame
 
   # Get evenly spaces pulses to fit the pitch pulse domain
-  pitch_vals <- interpolate_pitchpoints(new_times = seq(tmin,
-                                                        tmax,
+  pitch_vals <- interpolate_pitchpoints(new_times = seq(first_pulse,
+                                                        last_pulse,
                                                         length.out = n_pulses),
                                         old_times = x[['t']],
                                         pitch_vals = x[[tier_var]] ) - mean(x[[tier_var]])
