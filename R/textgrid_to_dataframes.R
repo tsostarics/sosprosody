@@ -13,18 +13,40 @@ textgrid_to_dataframes <- function(textgrid, .remove_filename = TRUE) {
   dfs <-
     lapply(textgrid,
            \(tier){
-             tg_df <- data.frame(file = class(textgrid)[['name']],
-                                 interval_start = tier[['t1']],
-                                 interval_end = tier[['t2']],
-                                 label = tier[['label']])
+             filename <-  class(textgrid)[['name']]
 
              if (.remove_filename)
-               tg_df[['file']] <- gsub("\\.TextGrid$", "", tg_df[['file']],
-                                       perl = TRUE)
+               filename <- gsub("\\.TextGrid$", "", filename, perl=TRUE)
 
-             tg_df[['interval_i']] <- seq_len(nrow(tg_df))
-             attr(tg_df, "tiertype") <- tier[['type']]
-             tg_df
+             make_tier_df(tier, filename)
            })
   dfs
+}
+
+make_interval_tier_df <- function(tier, filename) {
+  data.frame(file = filename,
+             interval_start = tier[['t1']],
+             interval_end = tier[['t2']],
+             label = tier[['label']],
+             interval_i = seq_along(tier[['t1']]))
+}
+
+
+make_point_tier_df <- function(tier, filename) {
+  data.frame(file = filename,
+             point_time = tier[['t']],
+             label = tier[['label']],
+             point_i = seq_along(tier[['label']]))
+}
+
+make_tier_df <- function(tier, filename) {
+  if (tier[['type']] == "interval") {
+    tier_df <- make_interval_tier_df(tier, filename)
+  } else {
+    tier_df <- make_point_tier_df(tier, filename)
+  }
+
+  attr(tier_df, "tiertype") <- tier[['type']]
+
+  tier_df
 }
