@@ -7,9 +7,6 @@
   if (.horiz_res < 10)
     .horiz_res <- 10
 
-  # Convert to semitones for more representative shape
-  pitch_vals <- x[[tier_var]] - mean(x[[tier_var]])
-
   # Get y-axis labels in Hz, then readjust the horizontal resolution
   # to accomodate the labels
   fmin <- as.character(round(min(x[[tier_var]]), 0))
@@ -32,7 +29,11 @@
   n_pulses <- last_frame - first_frame
 
   # Get evenly spaces pulses to fit the pitch pulse domain
-  indices <- round(seq(1L, length(pitch_vals), length.out = n_pulses), 0)
+  pitch_vals <- sosprosody:::interpolate_pitchpoints(new_times = seq(tmin,
+                                                                     tmax,
+                                                                     length.out = n_pulses),
+                                                     old_times = x[['t']],
+                                                     pitch_vals = x[[tier_var]] ) - mean(x[[tier_var]])
 
   # Establish pitch levels from the vertical resolution
   min_st <- min(pitch_vals)
@@ -45,7 +46,7 @@
   y_vals <- vapply(pitch_vals,
                    \(x)
                    which.min(abs(x - pitch_levels)),
-                   1.0)[indices]
+                   1.0)
 
   # Allocate matrix to fill with the plot
   holder <- matrix(" ", ncol = .horiz_res, nrow = .vert_res)
