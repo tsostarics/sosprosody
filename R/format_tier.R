@@ -29,11 +29,11 @@
   n_pulses <- last_frame - first_frame
 
   # Get evenly spaces pulses to fit the pitch pulse domain
-  pitch_vals <- sosprosody:::interpolate_pitchpoints(new_times = seq(tmin,
-                                                                     tmax,
-                                                                     length.out = n_pulses),
-                                                     old_times = x[['t']],
-                                                     pitch_vals = x[[tier_var]] ) - mean(x[[tier_var]])
+  pitch_vals <- interpolate_pitchpoints(new_times = seq(tmin,
+                                                        tmax,
+                                                        length.out = n_pulses),
+                                        old_times = x[['t']],
+                                        pitch_vals = x[[tier_var]] ) - mean(x[[tier_var]])
 
   # Establish pitch levels from the vertical resolution
   min_st <- min(pitch_vals)
