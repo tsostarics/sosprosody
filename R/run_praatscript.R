@@ -44,12 +44,11 @@
 #' but you could also use `base::system2` or `I` to return the string itself
 #' @param use_gui Logical, defaults to `FALSE` to run the script from the command
 #' line using `--run`. When `TRUE`, the script will be run in a new GUI window
-#' using `--new-open`. The script will be copied to a temporary file with
-#' `___temp` appended ot the file name. A new line containing `Quit` will be
-#' added to the end of the file. This will close the GUI after the script is
-#' run; the GUI will not close automatically otherwise and will prevent R from
-#' resuming execution. If you want to run a script that creates windows
-#' (e.g., `View & Edit`), you must set `use_gui = TRUE`.
+#' using `--new-send`. A new line containing `Quit` will be added to the end of
+#' the file. This will close the GUI after the script is run; the GUI will not
+#' close automatically otherwise and will prevent R from resuming execution.
+#' If you want to run a script that creates windows (e.g., `View & Edit`), you
+#' must set `use_gui = TRUE`.
 #'
 #'
 #' @return The system call specified by `method` is run, typically `0` if the
@@ -71,15 +70,9 @@ run_praatscript <- function(script_path,
   # script that includes a Quit command at the end so the GUI can close
   flag <- "--run"
   if (use_gui) {
-    temp_script_file <- paste0(script_path, "___temp")
-    file.copy(script_path, temp_script_file)
-
-    # Add a new line to temp_script_file that contains just Quit
-    # This will close the GUI after the script is run
-    cat("Quit", file = temp_script_file, sep = "\n", append = TRUE)
-
+    temp_script_file <- .make_temp_file(script_path)
     script_path <- temp_script_file
-    flag <- "--new-open"
+    flag <- "--new-send"
   }
 
   # Compile the arguments into a single command line string
@@ -131,4 +124,18 @@ run_praatscript <- function(script_path,
                 args = systemcall,
                 stdout = TRUE,
                 stderr = TRUE)
+}
+
+.make_temp_file <- function(script_path) {
+  # Create a temp script in the same directory as the given script
+  temp_dir <- dirname(script_path)
+  temp_script_file <- tempfile(tmpdir = temp_dir,fileext = ".praat")
+
+  file.copy(script_path, temp_script_file)
+
+  # Add a new line to temp_script_file that contains just Quit
+  # This will close the GUI after the script is run
+  cat("\nQuit", file = temp_script_file, sep = "\n", append = TRUE)
+
+  temp_script_file
 }

@@ -38,12 +38,11 @@ but you could also use \code{base::system2} or \code{I} to return the string its
 
 \item{use_gui}{Logical, defaults to \code{FALSE} to run the script from the command
 line using \code{--run}. When \code{TRUE}, the script will be run in a new GUI window
-using \code{--new-gui}. The script will be copied to a temporary file with
-\verb{___temp} appended ot the file name. A new line containing \code{Quit} will be
-added to the end of the file. This will close the GUI after the script is
-run; the GUI will not close automatically otherwise and will prevent R from
-resuming execution. If you want to run a script that creates windows
-(e.g., \code{View & Edit}), you must set \code{use_gui = TRUE}.}
+using \code{--new-send}. A new line containing \code{Quit} will be added to the end of
+the file. This will close the GUI after the script is run; the GUI will not
+close automatically otherwise and will prevent R from resuming execution.
+If you want to run a script that creates windows (e.g., \code{View & Edit}), you
+must set \code{use_gui = TRUE}.}
 }
 \value{
 The system call specified by \code{method} is run, typically \code{0} if the
