@@ -20,13 +20,9 @@
 #' or `FALSE` here will result in passing the the strings `"TRUE"` or `"FALSE"`
 #' to the script.
 #'
-#' On windows (i.e., on my computer), the command only runs if I run
-#' `system("Praat --run scriptpath arg1 arg2 arg3")`. `system2` won't work
-#' for me, nor will it work if I specify `Praat.exe`. To change these to make
-#' it work for you, set `praat_path` to wherever praat is on your computer
-#' (honestly it's small enough to just put a fresh copy of the executable in
-#' your project directory) and you can change `method` to `base::system2` if
-#' needed.
+#' If method is set to `system2`, the command will be run using `system2`
+#' with `stderr` and `stdout` both set to `TRUE`. The command will be `Praat`
+#' and the arguments will be everything following `Praat ` in the system call.
 #'
 #' See https://www.fon.hum.uva.nl/praat/manual/Scripting_6_9__Calling_from_the_command_line.html
 #' for more information on using Praat from the command line.
@@ -46,6 +42,15 @@
 #' in my project directories.
 #' @param method Which method to use to run system call, defaults to `base::system`,
 #' but you could also use `base::system2` or `I` to return the string itself
+#' @param use_gui Logical, defaults to `FALSE` to run the script from the command
+#' line using `--run`. When `TRUE`, the script will be run in a new GUI window
+#' using `--new-open`. The script will be copied to a temporary file with
+#' `___temp` appended ot the file name. A new line containing `Quit` will be
+#' added to the end of the file. This will close the GUI after the script is
+#' run; the GUI will not close automatically otherwise and will prevent R from
+#' resuming execution. If you want to run a script that creates windows
+#' (e.g., `View & Edit`), you must set `use_gui = TRUE`.
+#'
 #'
 #' @return The system call specified by `method` is run, typically `0` if the
 #' command was successful
@@ -55,18 +60,75 @@ run_praatscript <- function(script_path,
                             use_defaults = FALSE,
                             debug = FALSE,
                             praat_path = "Praat",
-                            method = base::system) {
+                            method = base::system,
+                            use_gui = FALSE) {
+  # Get the arguments as defined by the form in the praat script
   arguments <-
     validate_praat_arguments(script_path, use_defaults, ...) |>
     paste(collapse = " ")
 
+  # If we need to run the script in a new GUI window, we need to create a temp
+  # script that includes a Quit command at the end so the GUI can close
+  flag <- "--run"
+  if (use_gui) {
+    temp_script_file <- paste0(script_path, "___temp")
+    file.copy(script_path, temp_script_file)
+
+    # Add a new line to temp_script_file that contains just Quit
+    # This will close the GUI after the script is run
+    cat("Quit", file = temp_script_file, sep = "\n", append = TRUE)
+
+    script_path <- temp_script_file
+    flag <- "--new-open"
+  }
+
+  # Compile the arguments into a single command line string
   systemcall <- paste(praat_path,
-                      "--run",
+                      flag,
                       script_path,
                       arguments)
+
+
   if (debug) {
-    print(systemcall)
+    result <- systemcall
+    print(result)
   } else {
-    method(systemcall)
+
+    if (identical(method, base::system2)) {
+      result <- .use_system2(systemcall)
+    } else {
+      result <- method(systemcall)
+    }
+
+    if (result == 65535){
+      .check_for_window_commands(script_path)
+     stop("Praat returned an error. Try running the script in Praat or a separate shell window to inspect error message.")
+    }
   }
+
+  # Remove the temp file if we made one
+  if (use_gui) {
+    file.remove(temp_script_file)
+  }
+
+  result
+}
+
+# Checks for window commands in the script and throws an error if it finds any
+.check_for_window_commands <- function(script_path) {
+  script <- readLines(script_path)
+  window_calls <- grep("(View & Edit)|pauseScript|beginScript", script)
+  if (length(window_calls) > 0) {
+    stop("This script contains commands that create windows. Use `use_gui = TRUE` to run it.")
+  }
+}
+
+# base::system and base::system2 format the arguments differently
+.use_system2 <- function(systemcall) {
+  cmd <- "Praat"
+  systemcall <- gsub("^Praat ", "", systemcall)
+  base::system2(command = cmd,
+                args = systemcall,
+                stdout = TRUE,
+                stderr = TRUE)
 }

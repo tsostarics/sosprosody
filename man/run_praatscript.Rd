@@ -10,7 +10,8 @@ run_praatscript(
   use_defaults = FALSE,
   debug = FALSE,
   praat_path = "Praat",
-  method = base::system
+  method = base::system,
+  use_gui = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,15 @@ in my project directories.}
 
 \item{method}{Which method to use to run system call, defaults to \code{base::system},
 but you could also use \code{base::system2} or \code{I} to return the string itself}
+
+\item{use_gui}{Logical, defaults to \code{FALSE} to run the script from the command
+line using \code{--run}. When \code{TRUE}, the script will be run in a new GUI window
+using \code{--new-gui}. The script will be copied to a temporary file with
+\verb{___temp} appended ot the file name. A new line containing \code{Quit} will be
+added to the end of the file. This will close the GUI after the script is
+run; the GUI will not close automatically otherwise and will prevent R from
+resuming execution. If you want to run a script that creates windows
+(e.g., \code{View & Edit}), you must set \code{use_gui = TRUE}.}
 }
 \value{
 The system call specified by \code{method} is run, typically \code{0} if the
@@ -61,13 +71,9 @@ careful. Remember that booleans in praat are \code{1} and \code{0}, but passing 
 or \code{FALSE} here will result in passing the the strings \code{"TRUE"} or \code{"FALSE"}
 to the script.
 
-On windows (i.e., on my computer), the command only runs if I run
-\code{system("Praat --run scriptpath arg1 arg2 arg3")}. \code{system2} won't work
-for me, nor will it work if I specify \code{Praat.exe}. To change these to make
-it work for you, set \code{praat_path} to wherever praat is on your computer
-(honestly it's small enough to just put a fresh copy of the executable in
-your project directory) and you can change \code{method} to \code{base::system2} if
-needed.
+If method is set to \code{system2}, the command will be run using \code{system2}
+with \code{stderr} and \code{stdout} both set to \code{TRUE}. The command will be \code{Praat}
+and the arguments will be everything following \code{Praat } in the system call.
 
 See https://www.fon.hum.uva.nl/praat/manual/Scripting_6_9__Calling_from_the_command_line.html
 for more information on using Praat from the command line.
