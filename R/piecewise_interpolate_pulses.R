@@ -88,9 +88,11 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
     pitchtier_df <- dplyr::ungroup(pitchtier_df)
 
 
-  # Order timepoints (if not sorted the pulse indices will be wrong)
+  # Order timepoints if needed (if not sorted the pulse indices will be wrong)
   if (.sort)
-    pitchtier_df <- dplyr::ungroup(dplyr::arrange(.group_by_vec(pitchtier_df, .grouping), .data[[time_by]], .by_group = TRUE))
+    pitchtier_df <- dplyr::ungroup(dplyr::arrange(.group_by_vec(pitchtier_df, .grouping),
+                                                  .data[[time_by]],
+                                                  .by_group = TRUE))
 
   # Guess unique interval indices if index_column is not provided
   if (is.null(index_column))
@@ -131,8 +133,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                               .pitchval,
                               .grouping,
                               DROP_INDEX) {
-  # section_list <- split(file_df, file_df[[index_column]])
-
   indices <- unique(file_df[[index_column]])
 
   # Interpolate each section and row-bind the results
@@ -167,9 +167,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                  DROP_INDEX) {
   if (nrow(section_df) < 2L)
     return(NULL)
-  # stop(
-  # "Section only has one value, likely due to too much overlap after sorting.\nThis can also be caused by grouping by the index column but not providing it directly.\nRecommended to provide index_column to fix. Quitting to avoid R crash.")
-  # section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
+
   interval_idx <- section_df[[index_column]][1L]
   section_label <- section_df[[section_by]][1L]
   section_n_pulses <- pulses_per_section[as.character(section_label)]

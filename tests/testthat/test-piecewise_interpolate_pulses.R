@@ -71,8 +71,44 @@ test_that("piecewise interpolation with provided indices works", {
   expect_equal(nrow(int_df), 80)
 })
 
+test_that("index column correctly uniquely identifies regions with equal sections", {
+  tstdf <- data.frame(tstfile = "f",
+                      tstsec = c(rep("later",5),rep("earlier",5),
+                                 rep("later", 5)),
+                      tsthz = c(seq(10,50,10),
+                                c(10,20,30,20,10),
+                                c(40, 50, 60, 70, 80)),
+                      tsttp = c(6:10,
+                                1:5,
+                                11:15),
+                      tstint = rep(c(2,1,3), each = 5))
 
-test_that("guessed indices match provided indices", {
+  int_df <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 index_column = 'tstint',
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
+
+  int_df2 <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
+  expect_equal(nrow(int_df), 80)
+  expect_equal(nrow(int_df2), 50)
+})
+
+
+test_that("use section_by as index column works", {
   tstdf <- data.frame(tstfile = "f",
                       tstsec = c(rep("later",5),rep("earlier",5)),
                       tsthz = c(seq(10,50,10),
@@ -101,7 +137,7 @@ test_that("guessed indices match provided indices", {
                                  .grouping = 'tstfile',
                                  .sort = TRUE)
 
-  expect_equal(int_df[,c(1:4,6)], int_df2)
+  expect_equal(int_df[,-5], int_df2)
 })
 
 test_that("multiple files works", {
