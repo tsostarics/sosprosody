@@ -225,7 +225,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
     return(NULL)
   # stop(
   # "Section only has one value, likely due to too much overlap after sorting.\nThis can also be caused by grouping by the index column but not providing it directly.\nRecommended to provide index_column to fix. Quitting to avoid R crash.")
-  section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
+  # section_df <- .group_by_vec(section_df, full_groupings) # Needed to retain grouping columns, average_pitchtracks breaks otherwise
   interval_idx <- section_df[[index_column]][1L]
   section_label <- section_df[[section_by]][1L]
   section_n_pulses <- pulses_per_section[as.character(section_label)]
