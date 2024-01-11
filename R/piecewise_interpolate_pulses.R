@@ -67,6 +67,8 @@
 #'
 #' @return Dataframe of interpolated pitch pulses by section
 #' @export
+#'
+#' @importFrom stats setNames
 piecewise_interpolate_pulses <- function(pitchtier_df,
                                          section_by = "is_nuclear",
                                          pulses_per_section,
