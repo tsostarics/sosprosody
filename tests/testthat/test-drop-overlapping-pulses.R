@@ -12,7 +12,8 @@ test_that("juncture handling works", {
                                                         "later" = 30),
                                  time_by = "tsttp",
                                  .pitchval = 'tsthz',
-                                 .grouping = 'tstfile')
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
 
   adjusted_df_l <- drop_overlapping_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
   adjusted_df_r <- drop_overlapping_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')

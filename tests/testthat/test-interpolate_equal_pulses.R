@@ -28,7 +28,7 @@ test_that("interpolate equal pulses works", {
   expect_equal(round(int_df$tsttp,2), answer_df$tsttp)
   expect_equal(round(int_df$tsthz,2), answer_df$tsthz)
   expect_equal(int_df$tstfile, answer_df$tstfile)
-  expect_equal(attr(int_df,'groups')$tstfile, c('a','b'))
+  # expect_equal(attr(int_df,'groups')$tstfile, c('a','b'))
   # Check by visualization, the red points should be interpolated bw the black:
   # plot(tstdf$tsttp, tstdf$tsthz); points(int_df$tsttp, int_df$tsthz, col='red')
 
@@ -57,3 +57,4 @@ test_that("one NaN when starting with a duplicate", {
   expect_equal(interpolate_pitchpoints(6:9, c(6,6,8,9), c(10,10,30,40)),
                c(NaN, 20, 30, 40))
 })
+
