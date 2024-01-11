@@ -75,7 +75,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                          .sort = FALSE,
                                          parallelize = FALSE) {
   requireNamespace('data.table',quietly = TRUE)
-  DROP_INDEX <- FALSE
   pitchtier_df_cols <- colnames(pitchtier_df)
   stopifnot(section_by %in% pitchtier_df_cols)
   stopifnot(time_by %in% pitchtier_df_cols)
@@ -115,8 +114,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                             time_by = time_by,
                             full_groupings = full_groupings,
                             .pitchval = .pitchval,
-                            .grouping = .grouping,
-                            DROP_INDEX = DROP_INDEX)
+                            .grouping = .grouping)
 
         }))
   dplyr::left_join(interpolated_df, other_grouping_table, by = .grouping, multiple = 'all')
@@ -129,8 +127,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                               time_by,
                               full_groupings,
                               .pitchval,
-                              .grouping,
-                              DROP_INDEX) {
+                              .grouping) {
   indices <- unique(file_df[[index_column]])
 
   # Interpolate each section and row-bind the results
@@ -144,8 +141,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                         time_by = time_by,
                                         full_groupings = full_groupings,
                                         .pitchval = .pitchval,
-                                        .grouping = .grouping,
-                                        DROP_INDEX = DROP_INDEX)
+                                        .grouping = .grouping)
            })
 
   file_int_df <- do.call(rbind,  file_int_df_list)
@@ -161,8 +157,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                  time_by,
                                  full_groupings,
                                  .pitchval,
-                                 .grouping,
-                                 DROP_INDEX) {
+                                 .grouping) {
   if (nrow(section_df) < 2L)
     return(NULL)
 
@@ -177,8 +172,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                      .grouping = .grouping)
 
   int_df[[section_by]] <- section_label
-
-  if (!DROP_INDEX)
     int_df[[index_column]] <- interval_idx
 
   int_df
