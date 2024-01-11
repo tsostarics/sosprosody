@@ -7,12 +7,13 @@ test_that("piecewise interpolation works", {
                                 1:5))
   int_df <-
     piecewise_interpolate_pulses(tstdf,
-                               section_by = "tstsec",
-                               pulses_per_section = c("earlier" = 20,
-                                                      "later" = 30),
-                               time_by = "tsttp",
-                               .pitchval = 'tsthz',
-                               .grouping = 'tstfile')
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
 
   answer_tp <- c(1, 1.211, 1.421, 1.632, 1.842,
                  2.053, 2.263, 2.474, 2.684, 2.895,
@@ -24,7 +25,7 @@ test_that("piecewise interpolation works", {
                  8.069, 8.207, 8.345, 8.483, 8.621,
                  8.759, 8.897, 9.034, 9.172, 9.31,
                  9.448, 9.586, 9.724, 9.862, 10
-                 )
+  )
 
   answer_hz <- c(10,
                  12.105, 14.211, 16.316, 18.421, 20.526,
@@ -63,14 +64,51 @@ test_that("piecewise interpolation with provided indices works", {
                                  time_by = "tsttp",
                                  index_column = 'tstint',
                                  .pitchval = 'tsthz',
-                                 .grouping = 'tstfile')
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
 
   expect_equal(c(20, 60), as.vector(xtabs(~tstsec, data = int_df)))
   expect_equal(nrow(int_df), 80)
 })
 
+test_that("index column correctly uniquely identifies regions with equal sections", {
+  tstdf <- data.frame(tstfile = "f",
+                      tstsec = c(rep("later",5),rep("earlier",5),
+                                 rep("later", 5)),
+                      tsthz = c(seq(10,50,10),
+                                c(10,20,30,20,10),
+                                c(40, 50, 60, 70, 80)),
+                      tsttp = c(6:10,
+                                1:5,
+                                11:15),
+                      tstint = rep(c(2,1,3), each = 5))
 
-test_that("guessed indices match provided indices", {
+  int_df <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 index_column = 'tstint',
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
+
+  int_df2 <-
+    piecewise_interpolate_pulses(tstdf,
+                                 section_by = "tstsec",
+                                 pulses_per_section = c("earlier" = 20,
+                                                        "later" = 30),
+                                 time_by = "tsttp",
+                                 .pitchval = 'tsthz',
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
+  expect_equal(nrow(int_df), 80)
+  expect_equal(nrow(int_df2), 50)
+})
+
+
+test_that("use section_by as index column works", {
   tstdf <- data.frame(tstfile = "f",
                       tstsec = c(rep("later",5),rep("earlier",5)),
                       tsthz = c(seq(10,50,10),
@@ -86,7 +124,8 @@ test_that("guessed indices match provided indices", {
                                  time_by = "tsttp",
                                  index_column = 'tstint',
                                  .pitchval = 'tsthz',
-                                 .grouping = 'tstfile')
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
 
   int_df2 <-
     piecewise_interpolate_pulses(tstdf,
@@ -95,9 +134,10 @@ test_that("guessed indices match provided indices", {
                                                         "later" = 30),
                                  time_by = "tsttp",
                                  .pitchval = 'tsthz',
-                                 .grouping = 'tstfile')
+                                 .grouping = 'tstfile',
+                                 .sort = TRUE)
 
-  expect_equal(int_df[,c(1:4,6)], int_df2)
+  expect_equal(int_df[,-5], int_df2)
 })
 
 test_that("multiple files works", {
@@ -120,7 +160,7 @@ test_that("multiple files works", {
                                                         "later" = 30),
                                  time_by = "tsttp",
                                  .pitchval = 'tsthz',
-                                 .grouping = 'tstfile')
+                                 .grouping = 'tstfile',.sort = TRUE)
 
   answer_tp <- c(1, 1.211, 1.421, 1.632, 1.842,
                  2.053, 2.263, 2.474, 2.684, 2.895,
@@ -153,7 +193,7 @@ test_that("multiple files works", {
   expect_equal(round(int_df$tsttp, 3), answer_tp)
   expect_equal(round(int_df$tsthz, 3), answer_hz)
   expect_equal(unique(int_df$tstsec), c('earlier','later'))
-  expect_equal(attr(int_df,'groups')$tstfile, c("b", "f"))
+  # expect_equal(attr(int_df,'groups')$tstfile, c("b", "f"))
   expect_equal(int_df$pulse_i, answer_pulse_i)
 })
 

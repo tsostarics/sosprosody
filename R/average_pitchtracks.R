@@ -32,9 +32,15 @@
 #' are not uniquely identifiable by the column specified in the LHS.
 #' @param .pitchval Quoted column name containing the pitch values to average
 #' over. Defaults to `"hz"`
-#' @param parallelize Whether to run in parallel via multisession
+#' @param parallelize Deprecated, set up splits manually as a list of dataframes,
+#' then map to each subset using something like `furrr::future_map()`
 #' `furrr::future_map_dfr`, passed on to `piecewise_interpolate_pulses`
 #' @param index_column See `piecewise_interpolate_pulses`
+#' @param .sort Logical, whether to sort the dataset first. Default is FALSE,
+#' recommended to actually not use this and presort the data yourself if it
+#' happens to not be sorted already (usually F0 datasets are already sorted).
+#' This is really only included at this point for testing and error handling
+#' purposes.
 #'
 #' @return A dataframe containing the averaged and equally spaced piecewise
 #' pitch contours
@@ -49,6 +55,7 @@ average_pitchtracks <- function(pitchtier_df,
                                 aggregate_by,
                                 .pitchval = 'hz',
                                 index_column = NULL,
+                                .sort = FALSE,
                                 parallelize = FALSE) {
 
   stopifnot(section_by %in% names(pitchtier_df))
@@ -61,6 +68,7 @@ average_pitchtracks <- function(pitchtier_df,
   pulses_by <- all.vars(aggregate_by)[1L] # LHS term
   aggregate_within <- labels(terms(aggregate_by)) # RHS terms
 
+
   # Exctract equal pulses by section
   equal_pulse_df <-
     pitchtier_df |>
@@ -71,6 +79,7 @@ average_pitchtracks <- function(pitchtier_df,
                                  index_column = index_column,
                                  .grouping = pulses_by,
                                  .pitchval = .pitchval,
+                                 .sort = .sort,
                                  parallelize = parallelize)
 
   groupings <- c(aggregate_within, "pulse_i", section_by)
@@ -84,6 +93,5 @@ average_pitchtracks <- function(pitchtier_df,
                                      c(avg_colname, time_by)),
                  by = groupings]
 
-  .group_by_vec(averaged_df, groupings)
-
+  averaged_df
 }
