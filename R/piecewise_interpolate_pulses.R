@@ -87,9 +87,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   if (dplyr::is.grouped_df(pitchtier_df))
     pitchtier_df <- dplyr::ungroup(pitchtier_df)
 
-  # pitchtier_df <- ungroup(pitchtier_df) #.group_by_vec(pitchtier_df, .grouping) #data.table::copy(pitchtier_df)
-  # Change pitchtier_df to data.table so calculations run faster
-  # data.table::setDT(pitchtier_dt)
 
   # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
@@ -97,14 +94,8 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   # data.table::setorderv(pitchtier_dt, c(section_by, time_by, .grouping))
 
   # Guess unique interval indices if index_column is not provided
-  if (is.null(index_column)) {
+  if (is.null(index_column))
     index_column <- section_by
-    # pitchtier_dt[,
-    #              'sosprosody_interval_i' := guess_interval_indices(get(section_by)),
-    #              by = get(.grouping)]
-    # index_column <- 'sosprosody_interval_i'
-    # DROP_INDEX <- TRUE
-  }
 
   # Use unique intervals and section names to set appropriate # of pulses
   unique_sections <- as.character(unique(pitchtier_df[[section_by]]))
@@ -115,30 +106,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   if (parallelize)
     map_method <- furrr::future_map
 
-  # Split pitchtier_df into list of dataframes by file
-  # pitchtier_df[['groupingcol___']] <- interaction(lapply(full_groupings, \(g) factor(pitchtier_df[[g]])))
-  # pt_df_list <-
-  #   split(pitchtier_df, ~groupingcol___)
-
-
-  # pt_df_list <-
-  #   dplyr::group_split(pitchtier_dt)
-  #   # split(pitchtier_dt, pitchtier_dt[[full_groupings]])
-  #
-  # reframe(pitchtier_dt,
-  # .interpolate_file(.data,
-  #                   pulses_per_section = pulses_per_section,
-  #                   index_column = index_column,
-  #                   section_by = section_by,
-  #                   time_by = time_by,
-  #                   full_groupings = full_groupings,
-  #                   .pitchval = .pitchval,
-  #                   .grouping = .grouping,
-  #                   DROP_INDEX = DROP_INDEX))
-
-  other_grouping_table <- dplyr::reframe(pitchtier_df, .by = full_groupings)
-
-
+  other_grouping_table <- dplyr::reframe(pitchtier_df, .by = all_of(full_groupings))
 
   interpolated_df <-
     do.call(rbind,
@@ -185,24 +153,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                                         .pitchval = .pitchval,
                                         .grouping = .grouping,
                                         DROP_INDEX = DROP_INDEX)
-             # if(is.null(df))
-             #   return(NULL)
-
-             # df[['pulse_i']] = seq_len(nrow(df))
-             # df
            })
-
-  # lapply(section_list,
-  #        \(section_df)
-  #        .interpolate_section(section_df,
-  #                             pulses_per_section = pulses_per_section,
-  #                             index_column = index_column,
-  #                             section_by = section_by,
-  #                             time_by = time_by,
-  #                             full_groupings = full_groupings,
-  #                             .pitchval = .pitchval,
-  #                             .grouping = .grouping,
-  #                             DROP_INDEX = DROP_INDEX))
 
   file_int_df <- do.call(rbind,  file_int_df_list)
   file_int_df[['pulse_i']] <- seq_len(nrow(file_int_df))
