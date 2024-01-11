@@ -49,6 +49,7 @@ average_pitchtracks <- function(pitchtier_df,
                                 aggregate_by,
                                 .pitchval = 'hz',
                                 index_column = NULL,
+                                .sort = FALSE,
                                 parallelize = FALSE) {
 
   stopifnot(section_by %in% names(pitchtier_df))
@@ -61,6 +62,7 @@ average_pitchtracks <- function(pitchtier_df,
   pulses_by <- all.vars(aggregate_by)[1L] # LHS term
   aggregate_within <- labels(terms(aggregate_by)) # RHS terms
 
+
   # Exctract equal pulses by section
   equal_pulse_df <-
     pitchtier_df |>
@@ -71,6 +73,7 @@ average_pitchtracks <- function(pitchtier_df,
                                  index_column = index_column,
                                  .grouping = pulses_by,
                                  .pitchval = .pitchval,
+                                 .sort = .sort,
                                  parallelize = parallelize)
 
   groupings <- c(aggregate_within, "pulse_i", section_by)

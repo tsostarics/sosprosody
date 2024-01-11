@@ -32,43 +32,55 @@ interpolate_equal_pulses <- function(pitchtier_df,
                                      .grouping = 'file',
                                      .overridegroups = FALSE) {
   n_pulses <- as.integer(n_pulses)
-  full_groupings <- .get_groupings(pitchtier_df, .grouping, .overridegroups)
+  full_groupings <- .grouping #.get_groupings(pitchtier_df, .grouping, .overridegroups)
 
   reframe_fx <- getOption("sosprosody.reframe_fx")
 
-  # Set up the timestamps of the new pulses to interpolate
+  time_range <- range(pitchtier_df[[time_by]])
+
   interpolated_df <-
-    pitchtier_df |>
-    .group_by_vec(full_groupings) |>
-    dplyr::summarize(min_time = min(.data[[time_by]]),
-                     max_time = max(.data[[time_by]]),
-                     .groups = "keep") |>
-    reframe_fx(!!sym(time_by) := seq(.data[['min_time']],
-                                           .data[['max_time']],
-                                           length.out = n_pulses))
+    data.frame(f = pitchtier_df[[.grouping]][1],
+               t = seq(time_range[1],
+                       time_range[2],
+                       length.out = n_pulses))
+  colnames(interpolated_df) <- c(.grouping, time_by)
+  # Set up the timestamps of the new pulses to interpolate
+  # interpolated_df <-
+  #   pitchtier_df |>
+  #   # .group_by_vec(full_groupings) |>
+  #   # dplyr::summarize(min_time = min(.data[[time_by]]),
+  #   #                  max_time = max(.data[[time_by]]),
+  #   #                  .groups = "keep") |>
+  #   reframe_fx(!!sym(time_by) := seq(.data[['min_time']],
+  #                                          .data[['max_time']],
+  #                                          length.out = n_pulses))
 
   # Interpolate n_pulses between first and last timepoints
   group_vals <- unique(pitchtier_df[[.grouping]])
 
-  result <-
-    purrr::map_dfr(group_vals,
-                   \(grp) {
-                     # Get only the current group timestamps and pitch vals
-                     int_df <- interpolated_df[interpolated_df[[.grouping]] == grp,]
-                     pt_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
+  interpolated_df[[.pitchval]] <- interpolate_pitchpoints(interpolated_df[[time_by]],
+                                                          pitchtier_df[[time_by]],
+                                                          pitchtier_df[[.pitchval]])
 
-                     # Calculate the interpolated pitch values, add to interpolated df
-                     int_df[[.pitchval]] <- interpolate_pitchpoints(int_df[[time_by]],
-                                                                    pt_df[[time_by]],
-                                                                    pt_df[[.pitchval]])
-                     int_df
-                   })
+  # result <-
+  #   purrr::map_dfr(group_vals,
+  #                  \(grp) {
+  #                    # Get only the current group timestamps and pitch vals
+  #                    int_df <- interpolated_df[interpolated_df[[.grouping]] == grp,]
+  #                    pt_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
+  #
+  #                    # Calculate the interpolated pitch values, add to interpolated df
+  #                    int_df[[.pitchval]] <- interpolate_pitchpoints(int_df[[time_by]],
+  #                                                                   pt_df[[time_by]],
+  #                                                                   pt_df[[.pitchval]])
+  #                    int_df
+  #                  })
 
   # If there are duplicates then the interpolation may end up dividing by 0 at some point
-  if (anyNA(result[[.pitchval]]))
+  if (anyNA(interpolated_df[[.pitchval]]))
     warning("NA/NaNs detected in output, pitchtier_df$time_by likely has duplicates.")
 
-  .group_by_vec(result, full_groupings)
+  interpolated_df
 }
 
 .group_by_vec <- function(df, charvec) {

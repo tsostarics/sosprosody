@@ -12,6 +12,7 @@ average_pitchtracks(
   aggregate_by,
   .pitchval = "hz",
   index_column = NULL,
+  .sort = FALSE,
   parallelize = FALSE
 )
 }
