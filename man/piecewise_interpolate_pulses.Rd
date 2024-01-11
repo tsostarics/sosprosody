@@ -36,16 +36,12 @@ value will be recycled for all sections that are not specified. For example:
 c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
 }}
 
-\item{index_column}{String, column name containing numeric indices of each
-interval to extract pulses from. This really needs to be provided if you have
-two adjacent intervals that have the same label in the column \code{section_by}.
-Without unique indices differentiating them, this function will treat them
-as one "long" interval. If and only if you do not have this case present in
-your data, then you do not need to provide this. Leave it as NULL if
-you don't have the indices in your dataframe & the function will try to
-assign numeric indices based on when the labels in \code{section_by} change. If
-you do have them, but don't have the case previously described with adjacent
-labeled intervals, still provide the column name to save computation time.}
+\item{index_column}{String or NULL, column name containing numeric indices of
+each interval to extract pulses from. This only needs to be provided if you
+have two adjacent intervals that have the same label in the column
+\code{section_by}. Without unique indices differentiating them, this function
+will treat them as one "long" interval. If you don't have this issue in
+your data, then this can be left as NULL.}
 
 \item{time_by}{Quoted column name containing the timepoints, defaults to
 \code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
@@ -84,9 +80,9 @@ index for each section. For example, if you have three sections that share
 the label \code{"word"}, then these will all be treated as the same, ONE, section
 if there are no other sections in between each word. So, a separate column
 distinguishing word-1 from word-2 from word-3 is needed. This should be
-passed to \code{index_column}. If you don't have this precomputed, this function
-will try to guess by assigning indices to contiguous groups, but, if you
-have any sections that overlap, you may get incorrect results.
+passed to \code{index_column}. If you don't have duplicates, then the indices will
+be taken from the (presumably already uniquely identifying) values in
+\code{section_by}. If the results look weird, try adding a numeric index.
 
 Note that if you have two sections that share a boundary, you will get
 two pulses at the same timepoint-- one associated with the end of the first
