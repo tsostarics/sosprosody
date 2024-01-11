@@ -93,6 +93,5 @@ average_pitchtracks <- function(pitchtier_df,
                                      c(avg_colname, time_by)),
                  by = groupings]
 
-  .group_by_vec(averaged_df, groupings)
-
+  averaged_df
 }

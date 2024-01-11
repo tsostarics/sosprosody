@@ -36,23 +36,23 @@ interpolate_equal_pulses <- function(pitchtier_df,
 
   interpolated_df <-
     do.call(rbind, lapply(unique(pitchtier_df[[.grouping]]), \(grp) {
-      this_df <- pitchtier_df[pitchtier_df[[.grouping]] == grp,]
-      time_range <- range(this_df[[time_by]])
 
-      pulse_df <-
-        data.frame(f = grp,
-                   t = seq(time_range[1],
-                           time_range[2],
-                           length.out = n_pulses))
-      colnames(pulse_df) <- c(.grouping, time_by)
-      # Set up the timestamps of the new pulses to interpolate
-      # Interpolate n_pulses between first and last timepoints
-      # group_vals <- unique(this_df)
+      time_vals <- pitchtier_df[[time_by]][pitchtier_df[[.grouping]] == grp]
+      hz_vals <- pitchtier_df[[.pitchval]][pitchtier_df[[.grouping]] == grp]
 
-      pulse_df[[.pitchval]] <- interpolate_pitchpoints(pulse_df[[time_by]],
-                                                       this_df[[time_by]],
-                                                       this_df[[.pitchval]])
-      pulse_df
+      pulse_info <-
+        setNames(
+          list(rep(grp,n_pulses),
+               seq(min(time_vals), max(time_vals), length.out = n_pulses)),
+          c(.grouping, time_by)
+        )
+
+      pulse_info[[.pitchval]] <- interpolate_pitchpoints(pulse_info[[time_by]],
+                                                         time_vals,
+                                                         hz_vals)
+      class(pulse_info) <- 'data.frame'
+      attr(pulse_info, "row.names") <- seq_len(n_pulses)
+      pulse_info
     } ))
 
   # If there are duplicates then the interpolation may end up dividing by 0 at some point

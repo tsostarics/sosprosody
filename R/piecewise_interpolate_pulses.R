@@ -91,7 +91,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   # Order timepoints (if not sorted the pulse indices will be wrong)
   if (.sort)
     pitchtier_df <- dplyr::ungroup(dplyr::arrange(.group_by_vec(pitchtier_df, .grouping), .data[[time_by]], .by_group = TRUE))
-  # data.table::setorderv(pitchtier_dt, c(section_by, time_by, .grouping))
 
   # Guess unique interval indices if index_column is not provided
   if (is.null(index_column))
@@ -102,10 +101,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
 
   # If this should be run in parallel, use future_map
-  # map_method <- lapply
-  # if (parallelize)
-  #   map_method <- furrr::future_map
-
   other_grouping_table <- dplyr::reframe(pitchtier_df, .by = all_of(full_groupings))
 
   interpolated_df <-
@@ -124,7 +119,7 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
                             DROP_INDEX = DROP_INDEX)
 
         }))
-  merge(interpolated_df, other_grouping_table, by = .grouping)
+  dplyr::left_join(interpolated_df, other_grouping_table, by = .grouping, multiple = 'all')
 }
 
 .interpolate_file <- function(file_df,
@@ -157,8 +152,6 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
 
   file_int_df <- do.call(rbind,  file_int_df_list)
   file_int_df[['pulse_i']] <- seq_len(nrow(file_int_df))
-  # Add pulse_i column
-  # file_int_df[, 'pulse_i' := seq_len(.N)]
 
   file_int_df
 }
