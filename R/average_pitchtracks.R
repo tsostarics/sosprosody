@@ -32,9 +32,15 @@
 #' are not uniquely identifiable by the column specified in the LHS.
 #' @param .pitchval Quoted column name containing the pitch values to average
 #' over. Defaults to `"hz"`
-#' @param parallelize Whether to run in parallel via multisession
+#' @param parallelize Deprecated, set up splits manually as a list of dataframes,
+#' then map to each subset using something like `furrr::future_map()`
 #' `furrr::future_map_dfr`, passed on to `piecewise_interpolate_pulses`
 #' @param index_column See `piecewise_interpolate_pulses`
+#' @param .sort Logical, whether to sort the dataset first. Default is FALSE,
+#' recommended to actually not use this and presort the data yourself if it
+#' happens to not be sorted already (usually F0 datasets are already sorted).
+#' This is really only included at this point for testing and error handling
+#' purposes.
 #'
 #' @return A dataframe containing the averaged and equally spaced piecewise
 #' pitch contours

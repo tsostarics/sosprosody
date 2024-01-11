@@ -12,7 +12,7 @@ piecewise_interpolate_pulses(
   time_by = "timepoint_norm",
   .grouping = "file",
   .pitchval = "hz",
-  .sort = TRUE,
+  .sort = FALSE,
   parallelize = FALSE
 )
 }
@@ -64,8 +64,8 @@ dataframe is large, you should consider pre-sorting it before passing to this
 function & set this to FALSE. The sorting is needed to ensure that the pulse
 indices are in the correct order.}
 
-\item{parallelize}{Logical, defaults to FALSE, whether to run in parallel via multisession
-\code{furrr::future_map_dfr}}
+\item{parallelize}{Deprecated, set up splits manually as a list of dataframes,
+then map to each subset using something like \code{furrr::future_map()}}
 }
 \value{
 Dataframe of interpolated pitch pulses by section

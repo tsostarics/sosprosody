@@ -44,7 +44,14 @@ over. Defaults to \code{"hz"}}
 
 \item{index_column}{See \code{piecewise_interpolate_pulses}}
 
-\item{parallelize}{Whether to run in parallel via multisession
+\item{.sort}{Logical, whether to sort the dataset first. Default is FALSE,
+recommended to actually not use this and presort the data yourself if it
+happens to not be sorted already (usually F0 datasets are already sorted).
+This is really only included at this point for testing and error handling
+purposes.}
+
+\item{parallelize}{Deprecated, set up splits manually as a list of dataframes,
+then map to each subset using something like \code{furrr::future_map()}
 \code{furrr::future_map_dfr}, passed on to \code{piecewise_interpolate_pulses}}
 }
 \value{

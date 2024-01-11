@@ -57,8 +57,8 @@
 #' to `"file"`
 #' @param .pitchval Quoted column name for which pitch values to use, defaults
 #' to `"hz"`
-#' @param parallelize Logical, defaults to FALSE, whether to run in parallel via multisession
-#' `furrr::future_map_dfr`
+#' @param parallelize Deprecated, set up splits manually as a list of dataframes,
+#' then map to each subset using something like `furrr::future_map()`
 #' @param .sort Logical, defaults to TRUE, whether to sort the dataframe
 #' by the values in `time_by` for each group specified by `.grouping`. If your
 #' dataframe is large, you should consider pre-sorting it before passing to this
@@ -102,15 +102,15 @@ piecewise_interpolate_pulses <- function(pitchtier_df,
   pulses_per_section <- .fill_pps(pulses_per_section, unique_sections)
 
   # If this should be run in parallel, use future_map
-  map_method <- lapply
-  if (parallelize)
-    map_method <- furrr::future_map
+  # map_method <- lapply
+  # if (parallelize)
+  #   map_method <- furrr::future_map
 
   other_grouping_table <- dplyr::reframe(pitchtier_df, .by = all_of(full_groupings))
 
   interpolated_df <-
     do.call(rbind,
-      map_method(
+      lapply(
         other_grouping_table[[.grouping]],
         \(cur_file) {
           .interpolate_file(pitchtier_df[pitchtier_df[[.grouping]] == cur_file,],
