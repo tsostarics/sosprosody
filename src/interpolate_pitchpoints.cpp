@@ -28,28 +28,25 @@ NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& o
   if (!((new_times[0] >= old_times[0]) & (new_times[nt_size-1] <= old_times[ot_size-1])))
     stop("range of new_times must be within inclusive range of old_times");
 
-  int n = new_times.size();
-  NumericVector left_times(n, NA_REAL), right_times(n, NA_REAL);
-  NumericVector left_points(n, NA_REAL), right_points(n, NA_REAL);
-  NumericVector interpolated_values(n, NA_REAL);
+  NumericVector interpolated_values(nt_size, NA_REAL);
 
   int j = 0;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < nt_size; i++) {
     double difference = 1;
 
     while (difference > 0) {
       j++;
       difference = new_times[i] - old_times[j];
     }
-    left_times[i]   = old_times[j - 1];
-    right_times[i]  = old_times[j];
-    left_points[i]  = pitch_vals[j - 1];
-    right_points[i] = pitch_vals[j];
+    double left_time   = old_times[j - 1];
+    double right_time  = old_times[j];
+    double left_point  = pitch_vals[j - 1];
+    double right_point = pitch_vals[j];
 
-    double left_weight  = abs(new_times[i] - right_times[i]);
-    double right_weight = abs(new_times[i] - left_times[i]);
+    double left_weight  = abs(new_times[i] - right_time);
+    double right_weight = abs(new_times[i] - left_time);
 
-    interpolated_values[i] = (left_points[i] * left_weight + right_points[i] * right_weight) / (left_weight + right_weight);
+    interpolated_values[i] = (left_point * left_weight + right_point * right_weight) / (left_weight + right_weight);
     j--;
   }
 
