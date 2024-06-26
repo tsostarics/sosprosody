@@ -25,7 +25,7 @@ NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& o
   if (ot_size != pt_size)
     stop("old_times and pitch_vals must have equal length");
 
-  if (!((new_times[0] >= old_times[0]) & (new_times[nt_size-1] <= old_times[ot_size-1])))
+  if (!((new_times[0] >= old_times[0]) and (new_times[nt_size-1] <= old_times[ot_size-1])))
     stop("range of new_times must be within inclusive range of old_times");
 
   NumericVector interpolated_values(nt_size, NA_REAL);
