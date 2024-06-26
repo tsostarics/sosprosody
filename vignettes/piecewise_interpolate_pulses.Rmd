@@ -9,17 +9,17 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  warning = FALSE, 
-  dpi = 300,
-  message = FALSE,
-  # dev = 'pdf',
-  fig.height = 6,
-  fig.width = 8,
-  out.height = "600px",
-  out.width = "800px",
-  fig.align = 'center',
-  comment = "#>"
+collapse = TRUE,
+warning = FALSE, 
+dpi = 300,
+message = FALSE,
+# dev = 'pdf',
+fig.height = 6,
+fig.width = 8,
+out.height = "600px",
+out.width = "800px",
+fig.align = 'center',
+comment = "#>"
 )
 ```
 
@@ -35,6 +35,8 @@ library(sosprosody)
 library(rPraat)
 library(dplyr)
 library(ggplot2)
+vignette_path <- 
+  ifelse(file.exists("./simpsons_theyre_not.PitchTier"), ".","./vignettes")
 ```
 
 # Loading files 
@@ -43,8 +45,8 @@ Here's the basic workflow for loading a PitchTier object and TextGrid object
 using `sosprosody` and `rPraat`.
 
 ```{r load-files}
-pt <- pt.read("simpsons_theyre_not.PitchTier")
-tg <- tg.read("simpsons_theyre_not.TextGrid")
+pt <- pt.read(file.path(vignette_path, "simpsons_theyre_not.PitchTier"))
+tg <- tg.read(file.path(vignette_path, "simpsons_theyre_not.TextGrid"))
 
 pt
 tg
@@ -55,7 +57,7 @@ pitchtier_df <- pitchtier_to_dataframe(pt,
                                        add_erbs = FALSE, 
                                        add_semitones = FALSE)
 textgrid_tiers <- 
-  textgrid_to_dataframes(tg.read("simpsons_theyre_not.TextGrid"))
+  textgrid_to_dataframes(tg.read(file.path(vignette_path, "simpsons_theyre_not.TextGrid")))
 ```
 
 ## Bulk loading
@@ -65,26 +67,26 @@ This vignette uses two examples
 
 ```{r}
 pitchtiers <- 
-  lapply(list.files(path = "./", 
+  lapply(list.files(path = vignette_path, 
                     pattern = ".PitchTier$",
                     full.names = TRUE),
-       \(pt_path) {
-         pitchtier_to_dataframe(
-           pt.read(pt_path),
-           add_erbs = FALSE,
-           add_semitones = FALSE
-         )
-       }) 
+         \(pt_path) {
+           pitchtier_to_dataframe(
+             pt.read(pt_path),
+             add_erbs = FALSE,
+             add_semitones = FALSE
+           )
+         }) 
 
 pitchtier_df <- do.call(rbind, pitchtiers)
 
 all_tg_tiers <- 
-  lapply(list.files("./",
+  lapply(list.files(path = vignette_path,
                     pattern = ".TextGrid$",
                     full.names = TRUE),
-       \(tg_path) {
-         textgrid_to_dataframes(tg.read(tg_path))
-       }) |> 
+         \(tg_path) {
+           textgrid_to_dataframes(tg.read(tg_path))
+         }) |> 
   setNames(c("bobsburgers", "simpsons"))
 ```
 
@@ -95,21 +97,21 @@ And below I'll define a few helper functions that I'll use repeatedly.
 pull_tier <- function(tg_tier_list, which_tier) {
   tiers <- 
     lapply(tg_tier_list,
-         \(tg_list) 
-         tg_list[[which_tier]]) |> 
+           \(tg_list) 
+           tg_list[[which_tier]]) |> 
     unname()
   
   
-    do.call(rbind, args = tiers)
+  do.call(rbind, args = tiers)
 }
 
 # Plot pulses for each file colored by each section
 plot_pulses <- function(pulse_df) {
   pulse_df |> 
-  ggplot(aes(x = timepoint, y = hz, fill = label, group = interval_i)) +
-  geom_line() +
-  geom_point(color = 'black', shape = 21, size = 2) +
-  facet_grid(file~.) +
+    ggplot(aes(x = timepoint, y = hz, fill = label, group = interval_i)) +
+    geom_line() +
+    geom_point(color = 'black', shape = 21, size = 2) +
+    facet_grid(file~.) +
     theme_bw() +
     theme(legend.position = "top")
 }
@@ -117,10 +119,10 @@ plot_pulses <- function(pulse_df) {
 # Label pulses via non-equi join with dplyr
 label_pulses <- function(pitchtier_df, tg_df) {
   pitchtier_df |> 
-  dplyr::left_join(tg_df,
-                   by = join_by(file, between(timepoint, 
-                                              interval_start, 
-                                              interval_end))) |> 
+    dplyr::left_join(tg_df,
+                     by = join_by(file, between(timepoint, 
+                                                interval_start, 
+                                                interval_end))) |> 
     dplyr::filter(!grepl("^\\s*$", label))
 }
 ```
@@ -301,12 +303,12 @@ word3_interpolated_pulses2 <-
                                .grouping = "file")
 
 word3_interpolated_pulses2 |> 
-ggplot(aes(x = timepoint, y = hz, fill = label)) +
+  ggplot(aes(x = timepoint, y = hz, fill = label)) +
   geom_line() +
   geom_point(color = 'black', shape = 21, size = 2) +
   facet_grid(file~.) +
-    theme_bw() +
-    theme(legend.position = "top")
+  theme_bw() +
+  theme(legend.position = "top")
 ```
 
 We can see that we still get 10 pulses for "each word" and 5 pulses for "each disfluency", but because there are so many adjacent intervals with the same label, we get much fewer pulses in the end.
