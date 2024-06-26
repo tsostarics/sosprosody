@@ -17,7 +17,7 @@ using namespace Rcpp;
 //' @return Numeric vector of interpolated pitch points to correspond to the
 //' timepoints at `new_times`
 // [[Rcpp::export]]
-NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old_times, NumericVector pitch_vals) {
+NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& old_times, NumericVector& pitch_vals) {
   int ot_size = old_times.size();
   int pt_size = pitch_vals.size();
   int nt_size = new_times.size();
@@ -35,28 +35,22 @@ NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old
 
   int j = 0;
   for (int i = 0; i < n; i++) {
-    double x = new_times[i];
     double difference = 1;
 
     while (difference > 0) {
       j++;
-      difference = x - old_times[j];
+      difference = new_times[i] - old_times[j];
     }
-    left_times[i] = old_times[j - 1];
-    right_times[i] = old_times[j];
-    left_points[i] = pitch_vals[j - 1];
+    left_times[i]   = old_times[j - 1];
+    right_times[i]  = old_times[j];
+    left_points[i]  = pitch_vals[j - 1];
     right_points[i] = pitch_vals[j];
+
+    double left_weight  = abs(new_times[i] - right_times[i]);
+    double right_weight = abs(new_times[i] - left_times[i]);
+
+    interpolated_values[i] = (left_points[i] * left_weight + right_points[i] * right_weight) / (left_weight + right_weight);
     j--;
-  }
-
-  NumericVector left_weights = abs(new_times - right_times);
-  NumericVector right_weights = abs(new_times - left_times);
-
-  for (int i = 0; i < n; i++) {
-    NumericVector values = NumericVector::create(left_points[i], right_points[i]);
-    NumericVector weights = NumericVector::create(left_weights[i], right_weights[i]);
-    double wmean = sum(values * weights) / sum(weights);
-    interpolated_values[i] = wmean;
   }
 
   return interpolated_values;

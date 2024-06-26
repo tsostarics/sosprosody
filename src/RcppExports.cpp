@@ -11,14 +11,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // interpolate_pitchpoints
-NumericVector interpolate_pitchpoints(NumericVector new_times, NumericVector old_times, NumericVector pitch_vals);
+NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& old_times, NumericVector& pitch_vals);
 RcppExport SEXP _sosprosody_interpolate_pitchpoints(SEXP new_timesSEXP, SEXP old_timesSEXP, SEXP pitch_valsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type new_times(new_timesSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type old_times(old_timesSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type pitch_vals(pitch_valsSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type new_times(new_timesSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type old_times(old_timesSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type pitch_vals(pitch_valsSEXP);
     rcpp_result_gen = Rcpp::wrap(interpolate_pitchpoints(new_times, old_times, pitch_vals));
     return rcpp_result_gen;
 END_RCPP
