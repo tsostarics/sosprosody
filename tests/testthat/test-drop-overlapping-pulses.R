@@ -10,14 +10,15 @@ test_that("juncture handling works", {
                                  section_by = "tstsec",
                                  pulses_per_section = c("earlier" = 20,
                                                         "later" = 30),
-                                 time_by = "tsttp",
-                                 .pitchval = 'tsthz',
-                                 .grouping = 'tstfile',
-                                 .sort = TRUE)
+                                 x = "tsttp",
+                                 y = 'tsthz',
+                                 group = 'tstfile',
+                                 sort_first = TRUE,
+                                 index_by = NULL)
 
-  adjusted_df_l <- drop_overlapping_pulses(int_df,'l','tsttp','pulse_i',.grouping = 'tstfile')
-  adjusted_df_r <- drop_overlapping_pulses(int_df,'r','tsttp','pulse_i',.grouping = 'tstfile')
-  adjusted_df_b <- drop_overlapping_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
+  adjusted_df_l <- drop_overlapping_pulses(int_df,'l','tsttp','pulse_i',group = 'tstfile')
+  adjusted_df_r <- drop_overlapping_pulses(int_df,'r','tsttp','pulse_i',group = 'tstfile')
+  adjusted_df_b <- drop_overlapping_pulses(int_df,'b','tsttp','pulse_i',group = 'tstfile')
 
   expect_equal(as.vector(xtabs(~tstsec,data =  adjusted_df_l)),
                c(20,29))

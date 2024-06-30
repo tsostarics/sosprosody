@@ -26,10 +26,7 @@
 #' @param pulse_df Dataframe containing integer pulse indices and numeric
 #' timestamps
 #' @param keep String, either `'left'`, `'right'`, or `'both'`
-#' @param time_by String, which column contains the numeric timestamps
-#' @param pulse_col String, which column contains the integer timestamps
-#' @param .grouping String, which column should be used to identify unique
-#' groups (eg `file` for filenames)
+#' @param pulse_col Column containing pulse indices
 #'
 #' @return `pulse_df`, but with pulses removed and indices shifted accordingly
 #' @export
@@ -90,12 +87,18 @@
 #' adjusted_df_b <- drop_overlapping_pulses(int_df,'b','tsttp','pulse_i',.grouping = 'tstfile')
 #' }
 #'
+#' @inheritParams piecewise_interpolate_pulses
 drop_overlapping_pulses <- function(pulse_df,
                           keep,
-                          time_by = 'timepoint',
-                          pulse_col = 'pulse_i',
-                          .grouping = 'file') {
+                          x,
+                          pulse_col,
+                          group,
+                          time_by,
+                          .grouping) {
   keep <- match.arg(keep, c('left','right','both'))
+
+  deprecate_argument(x, time_by)
+  deprecate_argument(group, .grouping)
 
   # if 'keep' is 'both', return input data frame, as we want to retain both
   # pulses at each juncture
@@ -105,13 +108,13 @@ drop_overlapping_pulses <- function(pulse_df,
   adjusted_df <-
     # Split pulse data frame into groups
     pulse_df |>
-    .group_by_vec(.grouping) |>
+    .group_by_vec(group) |>
     dplyr::group_split() |>
     # For each group, remove pulses at each juncture within the group
     purrr::map_dfr(
       function(grp_df) {
         pulses <- grp_df[[pulse_col]]
-        time_diffs <- c(NA, diff(grp_df[[time_by]]))
+        time_diffs <- c(NA, diff(grp_df[[x]]))
         juncture_indices <- which(time_diffs == 0)
         n_pulses <- length(time_diffs)
 

@@ -6,53 +6,85 @@
 \usage{
 average_pitchtracks(
   pitchtier_df,
-  section_by,
+  section_by = NULL,
   pulses_per_section,
-  time_by = "timepoint_norm",
+  x,
   aggregate_by,
-  .pitchval = "hz",
-  index_column = NULL,
-  .sort = FALSE,
-  parallelize = FALSE
+  y,
+  group,
+  index_by = NULL,
+  sort_first = FALSE,
+  parallelize = FALSE,
+  .grouping,
+  .sort,
+  .pitchval,
+  time_by,
+  index_column
 )
 }
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}
 and preferably with time normalization already applied}
 
-\item{section_by}{Column name containing the section designations of the pitch contour}
+\item{section_by}{Column name containing the section designations of the
+pitch contour}
 
-\item{pulses_per_section}{An integer vector of how many points to use
-for each section of the contour. This needs to have EITHER 1 value, which
-is recycled for all sections OR as many values as there are sections. In the
-latter case, it is HIGHLY RECOMMENDED that this vector is NAMED and in the
-desired order of the sections. If the vector is unnamed, it will use the
-names of the section in the order they appear in the data.}
+\item{pulses_per_section}{A named integer vector of how many points to use
+for each section of the contour. There are three cases possible here.
+\itemize{
+\item 1 and only 1 unnamed value is provided, which is recycled for all sections.
+For example: c(10) for 10 pulses for all sections.
+\item All unique section names are specified with some number of pulses. So, if
+you have 5 sections, this vector should be named and of length 5. For
+example: c('a' = 10, 'b' = 30, 'c' = 20)
+\item A partially named integer vector with 1 unnamed value. The names should be
+valid section names that exist in the \code{section_by} column. The 1 unnamed
+value will be recycled for all sections that are not specified. For
+example: c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
+}}
 
-\item{time_by}{Quoted column name containing the timepoints, defaults to
+\item{x}{Quoted column name containing the timepoints, defaults to
 \code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
-preprocessing step beforehand)}
+preprocessing step beforehand). Note that the results will have new
+time-normalized values with the same column name.}
 
 \item{aggregate_by}{A formula of unquoted column names. The LHS should index
 individual recordings, e.g. a \code{file} column. The RHS should index what you
 want to aggregate over, e.g. by \code{utterance} and \code{tune}. This would be written
 as \code{file ~ utterance + tune}. Unpredictable results may occur if recordings
-are not uniquely identifiable by the column specified in the LHS.}
-
-\item{.pitchval}{Quoted column name containing the pitch values to average
-over. Defaults to \code{"hz"}}
-
-\item{index_column}{See \code{piecewise_interpolate_pulses}}
-
-\item{.sort}{Logical, whether to sort the dataset first. Default is FALSE,
-recommended to actually not use this and presort the data yourself if it
-happens to not be sorted already (usually F0 datasets are already sorted).
-This is really only included at this point for testing and error handling
-purposes.}
-
-\item{parallelize}{Deprecated, set up splits manually as a list of dataframes,
-then map to each subset using something like \code{furrr::future_map()}
+are not uniquely identifiable by the column specified in the LHS.
 \code{furrr::future_map_dfr}, passed on to \code{piecewise_interpolate_pulses}}
+
+\item{y}{Quoted column name for which pitch values to use, defaults to \code{"hz"}}
+
+\item{group}{Quoted column name indexing the unique recordings, defaults to
+\code{"file"}}
+
+\item{index_by}{String or NULL, column name containing numeric indices of
+each interval to extract pulses from. This only needs to be provided if you
+have two adjacent intervals that have the same label in the column
+\code{section_by}. Without unique indices differentiating them, this function
+will treat them as one "long" interval. If you don't have this issue in
+your data, then this can be left as NULL.}
+
+\item{sort_first}{Logical, defaults to TRUE, whether to sort the dataframe by
+the values in \code{x} for each group specified by \code{group}. If your dataframe is
+large, you should consider pre-sorting it before passing to this function &
+set this to FALSE. The sorting is needed to ensure that the pulse indices
+are in the correct order.}
+
+\item{parallelize}{Deprecated, not used}
+
+\item{.grouping}{Deprecated, use \code{group}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{.sort}{Deprecated, use \code{sort_first}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{.pitchval}{Deprecated, use \code{y}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{time_by}{Deprecated, use \code{x}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{index_column}{Deprecated, use \code{index_by}, @seealso
+\code{\link[=deprecate_argument]{deprecate_argument()}}}
 }
 \value{
 A dataframe containing the averaged and equally spaced piecewise
@@ -69,7 +101,9 @@ averaged with prenuclear points.
 \details{
 You can also chain this for higher-order aggregation, e.g. to get the average
 tune produced by a participant, then the average across all participants:
-pitchtier_df |>
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{pitchtier_df |>
 average_pitchtracks(aggregate_by = file ~ utterance + tune + participant) |>
 average_pitchtracks(aggregate_by = participant ~ utterance + tune)
+}\if{html}{\out{</div>}}
 }

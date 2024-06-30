@@ -7,9 +7,11 @@
 drop_overlapping_pulses(
   pulse_df,
   keep,
-  time_by = "timepoint",
-  pulse_col = "pulse_i",
-  .grouping = "file"
+  x,
+  pulse_col,
+  group,
+  time_by,
+  .grouping
 )
 }
 \arguments{
@@ -18,12 +20,19 @@ timestamps}
 
 \item{keep}{String, either \code{'left'}, \code{'right'}, or \code{'both'}}
 
-\item{time_by}{String, which column contains the numeric timestamps}
+\item{x}{Quoted column name containing the timepoints, defaults to
+\code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
+preprocessing step beforehand). Note that the results will have new
+time-normalized values with the same column name.}
 
-\item{pulse_col}{String, which column contains the integer timestamps}
+\item{pulse_col}{Column containing pulse indices}
 
-\item{.grouping}{String, which column should be used to identify unique
-groups (eg \code{file} for filenames)}
+\item{group}{Quoted column name indexing the unique recordings, defaults to
+\code{"file"}}
+
+\item{time_by}{Deprecated, use \code{x}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{.grouping}{Deprecated, use \code{group}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
 }
 \value{
 \code{pulse_df}, but with pulses removed and indices shifted accordingly

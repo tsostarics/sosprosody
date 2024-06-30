@@ -7,10 +7,13 @@
 interpolate_equal_pulses(
   pitchtier_df,
   n_pulses,
-  time_by = "timepoint_norm",
-  .pitchval = "hz",
-  .grouping = "file",
-  .overridegroups = FALSE
+  x,
+  y,
+  group,
+  .overridegroups = FALSE,
+  .grouping,
+  .pitchval,
+  time_by
 )
 }
 \arguments{
@@ -19,30 +22,36 @@ and preferably with time normalization already applied}
 
 \item{n_pulses}{Integer number of pulses to calculate}
 
-\item{time_by}{Quoted column name containing the timepoints, defaults to
+\item{x}{Quoted column name containing the timepoints, defaults to
 \code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
 preprocessing step beforehand). Note that the results will have new
 time-normalized values with the same column name.}
 
-\item{.pitchval}{Quoted column name for which pitch values to use, defaults
-to \code{"hz"}}
+\item{y}{Quoted column name for which pitch values to use, defaults to \code{"hz"}}
 
-\item{.grouping}{Quoted column name indexing the unique recordings, defaults
-to \code{"file"}}
+\item{group}{Quoted column name indexing the unique recordings, defaults to
+\code{"file"}}
 
-\item{.overridegroups}{Logical, Whether to override the grouping structure of \code{pitchtier_df}
-with what's specified by \code{file}. Defaults to \code{FALSE}}
+\item{.overridegroups}{Logical, Whether to override the grouping structure of
+\code{pitchtier_df} with what's specified by \code{file}. Defaults to \code{FALSE}}
+
+\item{.grouping}{Deprecated, use \code{group}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{.pitchval}{Deprecated, use \code{y}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{time_by}{Deprecated, use \code{x}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
 }
 \value{
 Dataframe with interpolated pulses
 }
 \description{
-This function will return equally spaced pitch pulses whose values are obtained
-via linear interpolation between the adjacent pitch pulses to that time point.
-For example, consider pitch points at times 1, 2, 3 with values 80, 90, 100.
-If you want four equally spaced points, they will be at times 1, 1.67, 2.33,
-and 3. The desired pitch point at 1.67 would be closer to 90 than 80, and so
-we can use the weighted mean of 80 and 90 with weights corresponding to the swapped
-distances (weight should be greater for 90, corresponding to the larger distance
-of 1.67 from 1) to calculate the new pitch value: 86.67
+This function will return equally spaced pitch pulses whose values are
+obtained via linear interpolation between the adjacent pitch pulses to that
+time point. For example, consider pitch points at times 1, 2, 3 with values
+80, 90, 100. If you want four equally spaced points, they will be at times 1,
+1.67, 2.33, and 3. The desired pitch point at 1.67 would be closer to 90 than
+80, and so we can use the weighted mean of 80 and 90 with weights
+corresponding to the swapped distances (weight should be greater for 90,
+corresponding to the larger distance of 1.67 from 1) to calculate the new
+pitch value: 86.67
 }

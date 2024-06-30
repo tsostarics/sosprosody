@@ -6,21 +6,31 @@
 \usage{
 piecewise_interpolate_pulses(
   pitchtier_df,
-  section_by = "is_nuclear",
+  x,
+  y,
   pulses_per_section,
-  index_column = NULL,
-  time_by = "timepoint_norm",
-  .grouping = "file",
-  .pitchval = "hz",
-  .sort = FALSE,
-  parallelize = FALSE
+  section_by = NULL,
+  index_by = NULL,
+  group,
+  sort_first,
+  parallelize = FALSE,
+  .grouping,
+  .sort,
+  .pitchval,
+  time_by,
+  index_column
 )
 }
 \arguments{
 \item{pitchtier_df}{Pitchtier dataframe, output of \code{batch_process_pitchtiers}
 and preferably with time normalization already applied}
 
-\item{section_by}{Column name containing the section designations of the pitch contour}
+\item{x}{Quoted column name containing the timepoints, defaults to
+\code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
+preprocessing step beforehand). Note that the results will have new
+time-normalized values with the same column name.}
+
+\item{y}{Quoted column name for which pitch values to use, defaults to \code{"hz"}}
 
 \item{pulses_per_section}{A named integer vector of how many points to use
 for each section of the contour. There are three cases possible here.
@@ -32,47 +42,52 @@ you have 5 sections, this vector should be named and of length 5. For
 example: c('a' = 10, 'b' = 30, 'c' = 20)
 \item A partially named integer vector with 1 unnamed value. The names should be
 valid section names that exist in the \code{section_by} column. The 1 unnamed
-value will be recycled for all sections that are not specified. For example:
-c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
+value will be recycled for all sections that are not specified. For
+example: c('a' = 10, 20) ==> c('a' = 10, 'b' = 20, 'c' = 20)
 }}
 
-\item{index_column}{String or NULL, column name containing numeric indices of
+\item{section_by}{Column name containing the section designations of the
+pitch contour}
+
+\item{index_by}{String or NULL, column name containing numeric indices of
 each interval to extract pulses from. This only needs to be provided if you
 have two adjacent intervals that have the same label in the column
 \code{section_by}. Without unique indices differentiating them, this function
 will treat them as one "long" interval. If you don't have this issue in
 your data, then this can be left as NULL.}
 
-\item{time_by}{Quoted column name containing the timepoints, defaults to
-\code{"timepoint_norm"} (highly recommended to use \code{time_normalize} as a
-preprocessing step beforehand). Note that the results will have new
-time-normalized values with the same column name.}
+\item{group}{Quoted column name indexing the unique recordings, defaults to
+\code{"file"}}
 
-\item{.grouping}{Quoted column name indexing the unique recordings, defaults
-to \code{"file"}}
+\item{sort_first}{Logical, defaults to TRUE, whether to sort the dataframe by
+the values in \code{x} for each group specified by \code{group}. If your dataframe is
+large, you should consider pre-sorting it before passing to this function &
+set this to FALSE. The sorting is needed to ensure that the pulse indices
+are in the correct order.}
 
-\item{.pitchval}{Quoted column name for which pitch values to use, defaults
-to \code{"hz"}}
+\item{parallelize}{Deprecated, not used}
 
-\item{.sort}{Logical, defaults to TRUE, whether to sort the dataframe
-by the values in \code{time_by} for each group specified by \code{.grouping}. If your
-dataframe is large, you should consider pre-sorting it before passing to this
-function & set this to FALSE. The sorting is needed to ensure that the pulse
-indices are in the correct order.}
+\item{.grouping}{Deprecated, use \code{group}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
 
-\item{parallelize}{Deprecated, set up splits manually as a list of dataframes,
-then map to each subset using something like \code{furrr::future_map()}}
+\item{.sort}{Deprecated, use \code{sort_first}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{.pitchval}{Deprecated, use \code{y}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{time_by}{Deprecated, use \code{x}, @seealso \code{\link[=deprecate_argument]{deprecate_argument()}}}
+
+\item{index_column}{Deprecated, use \code{index_by}, @seealso
+\code{\link[=deprecate_argument]{deprecate_argument()}}}
 }
 \value{
 Dataframe of interpolated pitch pulses by section
 }
 \description{
-This is an extension of \code{interpolate_equal_pulses} which extracts equal pulses
-within particular sections of a time series. This was written as a component of
-\code{average_pitchtracks}, where I needed to extract equally spaced pulses
-within prenuclear and nuclear regions separately so I could then take
-averages within the sections. This function can also be useful if you
-want a lower resolution for one section but a higher resolution for another.
+This is an extension of \code{interpolate_equal_pulses} which extracts equal
+pulses within particular sections of a time series. This was written as a
+component of \code{average_pitchtracks}, where I needed to extract equally spaced
+pulses within prenuclear and nuclear regions separately so I could then take
+averages within the sections. This function can also be useful if you want a
+lower resolution for one section but a higher resolution for another.
 }
 \details{
 It is highly recommended that you also have a column that denotes a numeric
@@ -80,14 +95,14 @@ index for each section. For example, if you have three sections that share
 the label \code{"word"}, then these will all be treated as the same, ONE, section
 if there are no other sections in between each word. So, a separate column
 distinguishing word-1 from word-2 from word-3 is needed. This should be
-passed to \code{index_column}. If you don't have duplicates, then the indices will
-be taken from the (presumably already uniquely identifying) values in
+passed to \code{index_by}. If you don't have duplicates, then the indices will be
+taken from the (presumably already uniquely identifying) values in
 \code{section_by}. If the results look weird, try adding a numeric index.
 
-Note that if you have two sections that share a boundary, you will get
-two pulses at the same timepoint-- one associated with the end of the first
+Note that if you have two sections that share a boundary, you will get two
+pulses at the same timepoint-- one associated with the end of the first
 section, the other at the start of the second. If you plot the pulse indices
-you'll encounter cases where there's no change from one pulse to another
-at these shared timestamps. If you want to remove one of them, please refer
-to \code{drop_overlapping_pulses()}.
+you'll encounter cases where there's no change from one pulse to another at
+these shared timestamps. If you want to remove one of them, please refer to
+\code{drop_overlapping_pulses()}.
 }

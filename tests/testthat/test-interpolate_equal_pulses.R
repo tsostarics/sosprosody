@@ -11,9 +11,9 @@ test_that("interpolate equal pulses works", {
 
   int_df <- interpolate_equal_pulses(tstdf,
                                      n_pulses = 10,
-                                     time_by = 'tsttp',
-                                     .pitchval = 'tsthz',
-                                     .grouping = 'tstfile')
+                                     x = 'tsttp',
+                                     y = 'tsthz',
+                                     group = 'tstfile')
 
 
   answer_df <- data.frame(tstfile = c(rep("a",10),rep("b",10)),

@@ -149,13 +149,14 @@ This should be done separately for each `file`.
 ```{r speaker-interpolated-pulses}
 speaker_interpolated_pulses <- 
   piecewise_interpolate_pulses(speaker_labeled_df,
+                               x = "timepoint",
+                               y = "hz",
                                section_by = "label",
                                pulses_per_section = c("A" = 40,
                                                       "B" = 5),
-                               index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file",
-                               .sort = F)
+                               index_by = "interval_i",
+                               group = "file",
+                               sort_first = F)
 
 # Compare to the pulses in the previous plot
 plot_pulses(speaker_interpolated_pulses)
@@ -183,14 +184,15 @@ region, and 5 for the disfluencies.
 ```{r section-interpolated-pulses}
 section_interpolated_pulses <- 
   piecewise_interpolate_pulses(section_labeled_df,
+                               x = "timepoint",
+                               y = "hz",
                                section_by = "label",
                                pulses_per_section = c("nuclear" = 10,
                                                       "prenuclear" = 20,
                                                       "disfl" = 5),
-                               index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file",
-                               .sort = F)
+                               index_by = "interval_i",
+                               group = "file",
+                               sort_first = F)
 
 plot_pulses(section_interpolated_pulses)
 ```
@@ -213,15 +215,16 @@ This time, there's way too many words to specify in `pulses_per_section`, so we'
 ```{r word-interpolated-pulses}
 word_interpolated_pulses <- 
   piecewise_interpolate_pulses(word_labeled_df,
+                               x = "timepoint",
+                               y = "hz",
                                section_by = "label",
                                pulses_per_section = c("proud" = 50,
                                                       "not" = 50,
                                                       "pentameter" = 20,
                                                       5),
-                               index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file",
-                               .sort = F)
+                               index_by = "interval_i",
+                               group = "file",
+                               sort_first = F)
 
 plot_pulses(word_interpolated_pulses)
 ```
@@ -244,13 +247,14 @@ Again this is a good chance to use a single value that gets recycled so we don't
 ```{r word2-interpolated-pulses}
 word2_interpolated_pulses <- 
   piecewise_interpolate_pulses(word2_labeled_df,
+                               x = "timepoint",
+                               y = "hz",
                                section_by = "label",
                                pulses_per_section = c("content" = 30,
                                                       5),
-                               index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file",
-                               .sort = F)
+                               index_by = "interval_i",
+                               group = "file",
+                               sort_first = F)
 
 plot_pulses(word2_interpolated_pulses)
 ```
@@ -259,10 +263,10 @@ plot_pulses(word2_interpolated_pulses)
 # Example 4
 
 Next we again use the word level, but here the words are annotated only for whether they're actually words or a disfluency.
-For this example, it's *especially* important that `index_column` is provided because there are many adjacent intervals labeled "word".
-When `index_column` isn't provided, `piecewise_interpolate_functions` tries to guess the unique interval indices based on where the interval labels specified in `section_by` change.
+For this example, it's *especially* important that `index_by` is provided because there are many adjacent intervals labeled "word".
+When `index_by` isn't provided, `piecewise_interpolate_functions` tries to guess the unique interval indices based on where the interval labels specified in `section_by` change.
 For example, *word disf word word disf* would correspond to unique indices of *1 2 3 3 4*, where the two *word* intervals in the middle are treated as a single "large" interval.
-If we provided `index_column` directly, we would know that the unique indices are actually *1 2 3 4 5*.
+If we provided `index_by` directly, we would know that the unique indices are actually *1 2 3 4 5*.
 
 Notice that when we plot the interval pulses, we can see that there are separated sections of pulses.
 
@@ -274,7 +278,7 @@ word3_labeled_df <- label_pulses(pitchtier_df, word3_tier_df)
 plot_pulses(word3_labeled_df)
 ```
 
-Here's what happens when we *do* provide `index_column`:
+Here's what happens when we *do* provide `index_by`:
 
 ```{r word3-interpolated-pulses}
 word3_interpolated_pulses <- 
@@ -282,10 +286,11 @@ word3_interpolated_pulses <-
                                section_by = "label",
                                pulses_per_section = c("word" = 10,
                                                       5),
-                               index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file",
-                               .sort = F)
+                               index_by = "interval_i",
+                               x = "timepoint",
+                               y = "hz",
+                               group = "file",
+                               sort_first = F)
 
 plot_pulses(word3_interpolated_pulses)
 ```
@@ -298,9 +303,11 @@ word3_interpolated_pulses2 <-
                                section_by = "label",
                                pulses_per_section = c("word" = 10,
                                                       5),
-                               # index_column = "interval_i",
-                               time_by = "timepoint",
-                               .grouping = "file")
+                               # index_by = "interval_i",
+                               x = "timepoint",
+                               y = "hz",
+                               group = "file",
+                               sort_first = FALSE)
 
 word3_interpolated_pulses2 |> 
   ggplot(aes(x = timepoint, y = hz, fill = label)) +
@@ -362,9 +369,10 @@ overlap_pulses <-
   overlapping_df |> 
   piecewise_interpolate_pulses(section_by = 'section',
                                pulses_per_section = 15,
-                               time_by = 'timestamp',
-                               .grouping = 'file',
-                               .sort = F)
+                               x = 'timestamp',
+                               y = 'hz',
+                               group = 'file',
+                               sort_first = F)
 
 overlap_pulses |> 
   ggplot(aes(x = pulse_i, y = hz)) +
@@ -396,16 +404,16 @@ So, I've provided a function `drop_overlapping_pulses` that will detect these se
 adjusted_df_l <- 
   overlap_pulses |> 
   drop_overlapping_pulses(keep = 'left',
-                          time_by = 'timestamp',
+                          x = 'timestamp',
                           pulse_col = 'pulse_i',
-                          .grouping = 'file')
+                          group = 'file')
 
 adjusted_df_r <- 
   overlap_pulses |> 
   drop_overlapping_pulses(keep = 'right',
-                          time_by = 'timestamp',
+                          x = 'timestamp',
                           pulse_col = 'pulse_i',
-                          .grouping = 'file')
+                          group = 'file')
 
 
 keep_left_plot <- 
