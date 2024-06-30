@@ -17,15 +17,17 @@ using namespace Rcpp;
 //' @return Numeric vector of interpolated pitch points to correspond to the
 //' timepoints at `new_times`
 // [[Rcpp::export]]
-NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& old_times, NumericVector& pitch_vals) {
-  int ot_size = old_times.size();
-  int pt_size = pitch_vals.size();
-  int nt_size = new_times.size();
+NumericVector interpolate_pitchpoints(const NumericVector& new_times,
+                                      const NumericVector& old_times,
+                                      const NumericVector& pitch_vals) {
+  const int ot_size = old_times.size();
+  const int pt_size = pitch_vals.size();
+  const int nt_size = new_times.size();
 
   if (ot_size != pt_size)
     stop("old_times and pitch_vals must have equal length");
 
-  if (!((new_times[0] >= old_times[0]) and (new_times[nt_size-1] <= old_times[ot_size-1])))
+  if ((new_times[0] < old_times[0]) or (new_times[nt_size-1] > old_times[ot_size-1]))
     stop("range of new_times must be within inclusive range of old_times");
 
   NumericVector interpolated_values(nt_size, NA_REAL);
@@ -43,8 +45,8 @@ NumericVector interpolate_pitchpoints(NumericVector& new_times, NumericVector& o
     double left_point  = pitch_vals[j - 1];
     double right_point = pitch_vals[j];
 
-    double left_weight  = abs(new_times[i] - right_time);
-    double right_weight = abs(new_times[i] - left_time);
+    double left_weight  = right_time   - new_times[i];
+    double right_weight = new_times[i] - left_time;
 
     interpolated_values[i] = (left_point * left_weight + right_point * right_weight) / (left_weight + right_weight);
     j--;
